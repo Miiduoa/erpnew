@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP 刷題練習網站</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        .transition-colors {
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 題庫數據 (前50題示例版本)
+        const QUESTIONS_DATA = [
+  {
+    "chapter": 1,
+    "number": 1,
+    "question": "ERP 系統最新的主流趨勢是採用下列哪一種基本技術架構",
+    "answer": "D",
+    "optionA": "集中式架構",
+    "optionB": "分散式架構",
+    "optionC": "同儕計算架構",
+    "optionD": "多層式(Multi-tier)主從架構。"
+  },
+  {
+    "chapter": 1,
+    "number": 2,
+    "question": "ERP 系統能即時整合各流程資料的原因為",
+    "answer": "A",
+    "optionA": "各流程資料儲存於同一資料庫中",
+    "optionB": "快速的電腦運算",
+    "optionC": "電子商務的盛行",
+    "optionD": "政府鼓勵。"
+  },
+  {
+    "chapter": 1,
+    "number": 3,
+    "question": "對 ERP 系統而言 ，下列敘述何者為非",
+    "answer": "A",
+    "optionA": "ERP 強調的是資料的整合，而即時性並不重要",
+    "optionB": "ERP 系統採主從式(Client-Server)架構",
+    "optionC": "ERP 系統為企業 e 化核心",
+    "optionD": "ERP 乃是一財務會計導向的資訊系統。"
+  },
+  {
+    "chapter": 1,
+    "number": 4,
+    "question": "以下何種模組所負責的業務部份較不屬於 ERP 的範籌",
+    "answer": "C",
+    "optionA": "倉儲管理",
+    "optionB": "財務模組",
+    "optionC": "製造現場控制(SFC)",
+    "optionD": "銷售/配送模組。"
+  },
+  {
+    "chapter": 1,
+    "number": 5,
+    "question": "一個能夠整合企業所有經營管理的資訊系統應該具備有 (1) 提供整合且即時的資訊 (2) 支援企 業運作及決策制定 (3) 系統之間能夠共享資訊 (4) 提升產品設計效率與績效 (5) 能夠累積眾多的 備份資料與密碼金鑰",
+    "answer": "A",
+    "optionA": "(1)(2)(3)",
+    "optionB": "(1)(2)(4)",
+    "optionC": "(1)(3)(5)",
+    "optionD": "(2)(4)(5)。"
+  },
+  {
+    "chapter": 1,
+    "number": 6,
+    "question": "以 ERP 的系統實作觀點而言，下列何者為非",
+    "answer": "C",
+    "optionA": "最好能夠配合既有組織文化來實作",
+    "optionB": "導入前應詳細評估企業本身需求",
+    "optionC": "系統複雜度高，往往需要客製化的程度越高越好",
+    "optionD": "經營高層的支持是成功的要件。"
+  },
+  {
+    "chapter": 1,
+    "number": 7,
+    "question": "關於 ERP 系統的敘述，下列何者為非",
+    "answer": "B",
+    "optionA": "可以降低企業經營成本",
+    "optionB": "實施時程短，效益立現",
+    "optionC": "可以整合組織內外相關資訊",
+    "optionD": "可以改善及創新企業流程。"
+  },
+  {
+    "chapter": 1,
+    "number": 8,
+    "question": "ERP 的原文Enterprise Resource Planning，這是指企業資源規劃，有關 ERP 的敘述何者正確",
+    "answer": "C",
+    "optionA": "是一種作業系統軟體",
+    "optionB": "是一種程式開發工具",
+    "optionC": "是一種企業管理軟體",
+    "optionD": "是一種通訊協定。"
+  },
+  {
+    "chapter": 1,
+    "number": 9,
+    "question": "有關 ERP 系統之敘述，下列何者錯誤",
+    "answer": "A",
+    "optionA": "整合了企業內的異質性系統，具有統一的使用者介面",
+    "optionB": "採用模組化的觀念設計",
+    "optionC": "各模組間的資料可共用",
+    "optionD": "可減少資料重複性。"
+  },
+  {
+    "chapter": 1,
+    "number": 10,
+    "question": "有關 ERP 的敘述，下列何者正確",
+    "answer": "D",
+    "optionA": "ERP 是一種硬體設備",
+    "optionB": "ERP 主要的功能在於電子商務",
+    "optionC": "ERP 是一種系統開發工具",
+    "optionD": "ERP 的主要目標在於整合企業流程。"
+  },
+  {
+    "chapter": 1,
+    "number": 11,
+    "question": "企業資源規劃系統(ERP)主要效益為何",
+    "answer": "D",
+    "optionA": "降低企業人事成本",
+    "optionB": "提高企業產品品質",
+    "optionC": "增加企業銷售業績",
+    "optionD": "整合企業營運流程。"
+  },
+  {
+    "chapter": 1,
+    "number": 12,
+    "question": "下列何者不是 ERP 成功實施的關鍵要素",
+    "answer": "D",
+    "optionA": "高階主管的全力支持",
+    "optionB": "專案團隊具有良好的溝通協調能力",
+    "optionC": "選擇合適的 ERP 軟體",
+    "optionD": "企業組織越大越容易成功。"
+  },
+  {
+    "chapter": 1,
+    "number": 13,
+    "question": "下列何者是 ERP 系統的特色",
+    "answer": "C",
+    "optionA": "程式開發容易",
+    "optionB": "只要安裝就可以使用",
+    "optionC": "跨功能整合",
+    "optionD": "價格便宜。"
+  },
+  {
+    "chapter": 1,
+    "number": 14,
+    "question": "下列何者不是ERP系統所強調的",
+    "answer": "A",
+    "optionA": "個人化的資訊需求",
+    "optionB": "即時的資訊處理",
+    "optionC": "整合的資訊系統",
+    "optionD": "跨功能的資訊分享。"
+  },
+  {
+    "chapter": 1,
+    "number": 15,
+    "question": "ERP 套裝軟體的主要特色為何",
+    "answer": "B",
+    "optionA": "價格便宜，容易取得",
+    "optionB": "整合性佳，涵蓋企業大部分功能",
+    "optionC": "彈性大，容易修改",
+    "optionD": "安裝容易，學習簡單。"
+  },
+  {
+    "chapter": 1,
+    "number": 16,
+    "question": "以下關於 ERP 之敘述何者為真",
+    "answer": "A",
+    "optionA": "ERP 是整合性的企業資訊系統",
+    "optionB": "ERP 主要是財務會計系統",
+    "optionC": "ERP 只適用於製造業",
+    "optionD": "ERP 就是電子商務系統。"
+  },
+  {
+    "chapter": 1,
+    "number": 17,
+    "question": "ERP 系統主要是以何種導向為主",
+    "answer": "B",
+    "optionA": "技術導向",
+    "optionB": "流程導向",
+    "optionC": "功能導向",
+    "optionD": "部門導向。"
+  },
+  {
+    "chapter": 1,
+    "number": 18,
+    "question": "下列何者最能表達ERP的精神",
+    "answer": "C",
+    "optionA": "企業流程自動化",
+    "optionB": "提升資訊技術應用",
+    "optionC": "企業流程整合",
+    "optionD": "降低人事成本。"
+  },
+  {
+    "chapter": 1,
+    "number": 19,
+    "question": "以下何者非導入ERP系統可能遭遇的風險",
+    "answer": "A",
+    "optionA": "系統功能過於簡單",
+    "optionB": "組織變革阻力",
+    "optionC": "實施成本過高",
+    "optionD": "實施時程延宕。"
+  },
+  {
+    "chapter": 1,
+    "number": 20,
+    "question": "ERP 系統導入的成功關鍵因素，下列何者為非",
+    "answer": "D",
+    "optionA": "高階主管的支持與承諾",
+    "optionB": "組織變革管理",
+    "optionC": "員工的教育訓練",
+    "optionD": "採用最新的資訊技術。"
+  },
+  {
+    "chapter": 1,
+    "number": 21,
+    "question": "下列何者不是實施 ERP 應有的觀念",
+    "answer": "B",
+    "optionA": "ERP 不只是一套資訊系統",
+    "optionB": "ERP 實施後立即可以看到效果",
+    "optionC": "ERP 的實施需要企業流程的配合",
+    "optionD": "ERP 實施是一個持續的過程。"
+  },
+  {
+    "chapter": 1,
+    "number": 22,
+    "question": "一般而言，ERP導入專案的期程約為",
+    "answer": "C",
+    "optionA": "1-3個月",
+    "optionB": "3-6個月",
+    "optionC": "6個月至2年",
+    "optionD": "3-5年。"
+  },
+  {
+    "chapter": 1,
+    "number": 23,
+    "question": "ERP系統實施後，下列何種效益最不易衡量",
+    "answer": "D",
+    "optionA": "降低庫存成本",
+    "optionB": "縮短生產週期時間",
+    "optionC": "減少人力需求",
+    "optionD": "提升決策品質。"
+  },
+  {
+    "chapter": 1,
+    "number": 24,
+    "question": "下列何者不是ERP系統所能提供的效益",
+    "answer": "A",
+    "optionA": "保證企業獲利",
+    "optionB": "提升營運效率",
+    "optionC": "改善資訊品質",
+    "optionD": "強化內部控制。"
+  },
+  {
+    "chapter": 1,
+    "number": 25,
+    "question": "以下何者是ERP系統成功實施的最重要因素",
+    "answer": "A",
+    "optionA": "高層主管的支持",
+    "optionB": "充足的資金",
+    "optionC": "先進的硬體設備",
+    "optionD": "豐富的IT人才。"
+  },
+  {
+    "chapter": 1,
+    "number": 26,
+    "question": "ERP系統對企業組織的影響，下列敘述何者正確",
+    "answer": "C",
+    "optionA": "組織階層會增加",
+    "optionB": "部門間的界線會更明確",
+    "optionC": "組織會更扁平化",
+    "optionD": "工作專業化程度會降低。"
+  },
+  {
+    "chapter": 1,
+    "number": 27,
+    "question": "ERP軟體套件的主要供應商不包括下列何者",
+    "answer": "D",
+    "optionA": "SAP",
+    "optionB": "Oracle",
+    "optionC": "Microsoft",
+    "optionD": "Adobe。"
+  },
+  {
+    "chapter": 1,
+    "number": 28,
+    "question": "下列何者不屬於ERP的核心模組",
+    "answer": "D",
+    "optionA": "財務管理",
+    "optionB": "物料管理",
+    "optionC": "生產管理",
+    "optionD": "網頁設計。"
+  },
+  {
+    "chapter": 1,
+    "number": 29,
+    "question": "ERP系統中，下列何者是處理企業日常營運活動的系統",
+    "answer": "A",
+    "optionA": "交易處理系統(TPS)",
+    "optionB": "管理資訊系統(MIS)",
+    "optionC": "決策支援系統(DSS)",
+    "optionD": "主管資訊系統(EIS)。"
+  },
+  {
+    "chapter": 1,
+    "number": 30,
+    "question": "ERP軟體的授權費用通常是以下列何者為計算基準",
+    "answer": "B",
+    "optionA": "硬體設備數量",
+    "optionB": "使用者人數",
+    "optionC": "資料庫大小",
+    "optionD": "營業額多寡。"
+  },
+  {
+    "chapter": 1,
+    "number": 31,
+    "question": "下列何者不是選擇ERP軟體的考量因素",
+    "answer": "D",
+    "optionA": "軟體功能符合度",
+    "optionB": "廠商技術支援能力",
+    "optionC": "總擁有成本",
+    "optionD": "軟體介面美觀度。"
+  },
+  {
+    "chapter": 1,
+    "number": 32,
+    "question": "ERP專案團隊的組成，下列何者最重要",
+    "answer": "A",
+    "optionA": "業務流程負責人",
+    "optionB": "資訊技術專家",
+    "optionC": "高階主管",
+    "optionD": "外部顧問。"
+  },
+  {
+    "chapter": 1,
+    "number": 33,
+    "question": "下列何者是ERP系統導入後的維護工作",
+    "answer": "D",
+    "optionA": "軟體版本更新",
+    "optionB": "使用者訓練",
+    "optionC": "系統效能調整",
+    "optionD": "以上皆是。"
+  },
+  {
+    "chapter": 1,
+    "number": 34,
+    "question": "ERP系統的資料庫設計通常採用下列何種方式",
+    "answer": "B",
+    "optionA": "階層式資料庫",
+    "optionB": "關聯式資料庫",
+    "optionC": "網狀式資料庫",
+    "optionD": "物件導向資料庫。"
+  },
+  {
+    "chapter": 1,
+    "number": 35,
+    "question": "ERP系統中的主檔資料(Master Data)不包括下列何者",
+    "answer": "D",
+    "optionA": "客戶主檔",
+    "optionB": "供應商主檔",
+    "optionC": "物料主檔",
+    "optionD": "交易明細檔。"
+  },
+  {
+    "chapter": 1,
+    "number": 36,
+    "question": "下列何者不是ERP系統的技術特色",
+    "answer": "A",
+    "optionA": "單機作業環境",
+    "optionB": "客戶伺服器架構",
+    "optionC": "開放式系統",
+    "optionD": "模組化設計。"
+  },
+  {
+    "chapter": 1,
+    "number": 37,
+    "question": "ERP系統對中小企業的意義，下列何者正確",
+    "answer": "C",
+    "optionA": "不適合中小企業使用",
+    "optionB": "中小企業沒有導入的必要",
+    "optionC": "有助於中小企業提升競爭力",
+    "optionD": "中小企業無法負擔相關費用。"
+  },
+  {
+    "chapter": 1,
+    "number": 38,
+    "question": "ERP系統導入失敗的主要原因不包括",
+    "answer": "D",
+    "optionA": "缺乏高層支持",
+    "optionB": "組織變革阻力大",
+    "optionC": "專案管理不當",
+    "optionD": "硬體設備不足。"
+  },
+  {
+    "chapter": 1,
+    "number": 39,
+    "question": "下列何者是ERP與傳統資訊系統的主要差異",
+    "answer": "B",
+    "optionA": "使用的程式語言不同",
+    "optionB": "系統整合程度不同",
+    "optionC": "硬體需求不同",
+    "optionD": "開發時間不同。"
+  },
+  {
+    "chapter": 1,
+    "number": 40,
+    "question": "ERP系統的模組化設計有何優點",
+    "answer": "A",
+    "optionA": "企業可分階段導入",
+    "optionB": "降低系統複雜度",
+    "optionC": "提高系統執行速度",
+    "optionD": "減少記憶體使用量。"
+  },
+  {
+    "chapter": 1,
+    "number": 41,
+    "question": "下列何者不是ERP廠商提供的服務",
+    "answer": "D",
+    "optionA": "軟體安裝",
+    "optionB": "使用者訓練",
+    "optionC": "系統維護",
+    "optionD": "硬體採購。"
+  },
+  {
+    "chapter": 1,
+    "number": 42,
+    "question": "ERP系統的即時處理能力主要是指",
+    "answer": "B",
+    "optionA": "系統反應速度很快",
+    "optionB": "資料更新後立即反映到相關模組",
+    "optionC": "可以24小時不間斷運作",
+    "optionD": "支援同時多人使用。"
+  },
+  {
+    "chapter": 1,
+    "number": 43,
+    "question": "ERP導入過程中的企業流程再造(BPR)主要目的為",
+    "answer": "C",
+    "optionA": "降低人力成本",
+    "optionB": "提高自動化程度",
+    "optionC": "改善營運效率",
+    "optionD": "減少系統功能需求。"
+  },
+  {
+    "chapter": 1,
+    "number": 44,
+    "question": "下列何者不是ERP系統的使用效益",
+    "answer": "A",
+    "optionA": "完全消除人為錯誤",
+    "optionB": "提升資料準確性",
+    "optionC": "改善工作效率",
+    "optionD": "強化內控制度。"
+  },
+  {
+    "chapter": 1,
+    "number": 45,
+    "question": "ERP系統中的工作流程(Workflow)功能主要用於",
+    "answer": "D",
+    "optionA": "資料備份",
+    "optionB": "使用者認證",
+    "optionC": "系統監控",
+    "optionD": "業務流程自動化。"
+  },
+  {
+    "chapter": 1,
+    "number": 46,
+    "question": "下列何者是影響ERP導入成本的主要因素",
+    "answer": "D",
+    "optionA": "軟體授權費",
+    "optionB": "顧問服務費",
+    "optionC": "教育訓練費",
+    "optionD": "以上皆是。"
+  },
+  {
+    "chapter": 1,
+    "number": 47,
+    "question": "ERP系統對企業決策的影響，下列何者正確",
+    "answer": "A",
+    "optionA": "提供更即時準確的資訊",
+    "optionB": "完全取代人工決策",
+    "optionC": "降低決策的複雜性",
+    "optionD": "減少決策所需時間。"
+  },
+  {
+    "chapter": 1,
+    "number": 48,
+    "question": "下列何者不是ERP系統的安全控制機制",
+    "answer": "C",
+    "optionA": "使用者身分認證",
+    "optionB": "權限管理",
+    "optionC": "資料壓縮",
+    "optionD": "稽核軌跡。"
+  },
+  {
+    "chapter": 1,
+    "number": 49,
+    "question": "ERP系統的客製化程度應該",
+    "answer": "B",
+    "optionA": "越高越好",
+    "optionB": "適度即可",
+    "optionC": "完全不要",
+    "optionD": "視預算而定。"
+  },
+  {
+    "chapter": 1,
+    "number": 50,
+    "question": "下列何者是評估ERP導入成效的指標",
+    "answer": "D",
+    "optionA": "庫存週轉率改善",
+    "optionB": "訂單處理時間縮短",
+    "optionC": "客戶滿意度提升",
+    "optionD": "以上皆是。"
+  }
+];
+
+        // 圖標組件
+        const Icon = ({ children, className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {children}
+            </svg>
+        );
+
+        const ChevronLeft = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </Icon>
+        );
+
+        const ChevronRight = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </Icon>
+        );
+
+        const RotateCcw = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1 4v6h6" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+            </Icon>
+        );
+
+        const BookOpen = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </Icon>
+        );
+
+        const Target = ({ className }) => (
+            <Icon className={className}>
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+            </Icon>
+        );
+
+        const Trophy = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </Icon>
+        );
+
+        const CheckCircle = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </Icon>
+        );
+
+        const XCircle = ({ className }) => (
+            <Icon className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </Icon>
+        );
+
+        // 主要應用組件
+        const ERPQuizApp = () => {
+            const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+            const [userAnswers, setUserAnswers] = React.useState({});
+            const [showResult, setShowResult] = React.useState(false);
+
+            const questions = QUESTIONS_DATA;
+            const currentQuestion = questions[currentQuestionIndex];
+            const totalQuestions = questions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+
+            const handleAnswerSelect = (selectedAnswer) => {
+                const questionId = currentQuestion.number;
+                setUserAnswers(prev => ({
+                    ...prev,
+                    [questionId]: selectedAnswer
+                }));
+                setShowResult(true);
+            };
+
+            const goToNextQuestion = () => {
+                if (currentQuestionIndex < totalQuestions - 1) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                    setShowResult(false);
+                }
+            };
+
+            const goToPreviousQuestion = () => {
+                if (currentQuestionIndex > 0) {
+                    setCurrentQuestionIndex(prev => prev - 1);
+                    setShowResult(false);
+                }
+            };
+
+            const resetQuiz = () => {
+                setUserAnswers({});
+                setCurrentQuestionIndex(0);
+                setShowResult(false);
+            };
+
+            const calculateScore = () => {
+                let correctCount = 0;
+                questions.forEach(q => {
+                    if (userAnswers[q.number] === q.answer) {
+                        correctCount++;
+                    }
+                });
+                return correctCount;
+            };
+
+            const getScorePercentage = () => {
+                if (answeredCount === 0) return 0;
+                const correctCount = calculateScore();
+                return Math.round((correctCount / answeredCount) * 100);
+            };
+
+            // 鍵盤快捷鍵支援
+            React.useEffect(() => {
+                const handleKeyPress = (e) => {
+                    if (showResult) return;
+                    
+                    switch(e.key.toUpperCase()) {
+                        case 'A':
+                        case 'B':
+                        case 'C':
+                        case 'D':
+                            handleAnswerSelect(e.key.toUpperCase());
+                            break;
+                        case 'ARROWLEFT':
+                            e.preventDefault();
+                            goToPreviousQuestion();
+                            break;
+                        case 'ARROWRIGHT':
+                            e.preventDefault();
+                            goToNextQuestion();
+                            break;
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyPress);
+                return () => window.removeEventListener('keydown', handleKeyPress);
+            }, [showResult, currentQuestionIndex]);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+                    {/* 頂部狀態欄 */}
+                    <div className="bg-white shadow-sm border-b">
+                        <div className="max-w-4xl mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div className="flex items-center space-x-4">
+                                    <BookOpen className="h-6 w-6 text-indigo-600" />
+                                    <h1 className="text-xl font-bold text-gray-800">ERP 刷題練習</h1>
+                                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                        示例版本 (前50題)
+                                    </span>
+                                </div>
+                                <div className="flex items-center space-x-6">
+                                    <div className="flex items-center space-x-2">
+                                        <Target className="h-5 w-5 text-blue-600" />
+                                        <span className="text-sm text-gray-600">
+                                            {currentQuestionIndex + 1} / {totalQuestions}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Trophy className="h-5 w-5 text-green-600" />
+                                        <span className="text-sm text-gray-600">
+                                            已答: {answeredCount} | 正確率: {getScorePercentage()}%
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={resetQuiz}
+                                        className="flex items-center space-x-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                    >
+                                        <RotateCcw className="h-4 w-4" />
+                                        <span className="text-sm">重新開始</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 進度條 */}
+                    <div className="max-w-4xl mx-auto px-4 py-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
+                            ></div>
+                        </div>
+                    </div>
+
+                    {/* 主要內容區域 */}
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+                        <div className="bg-white rounded-xl shadow-lg p-8">
+                            {/* 題目 */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        第 {currentQuestion.number} 題
+                                    </span>
+                                    <div className="text-xs text-gray-500">
+                                        使用鍵盤 A/B/C/D 快速答題 • ←→ 切換題目
+                                    </div>
+                                </div>
+                                <h2 className="text-xl font-medium text-gray-800 leading-relaxed">
+                                    {currentQuestion.question}
+                                </h2>
+                            </div>
+
+                            {/* 選項 */}
+                            <div className="space-y-3 mb-8">
+                                {['A', 'B', 'C', 'D'].map((option) => {
+                                    const optionText = currentQuestion[`option${option}`];
+                                    const isSelected = userAnswers[currentQuestion.number] === option;
+                                    const isCorrect = currentQuestion.answer === option;
+                                    const showAnswer = showResult && userAnswers[currentQuestion.number];
+                                    
+                                    let buttonClass = "w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ";
+                                    
+                                    if (showAnswer) {
+                                        if (isCorrect) {
+                                            buttonClass += "border-green-500 bg-green-50 text-green-800";
+                                        } else if (isSelected && !isCorrect) {
+                                            buttonClass += "border-red-500 bg-red-50 text-red-800";
+                                        } else {
+                                            buttonClass += "border-gray-200 bg-gray-50 text-gray-600";
+                                        }
+                                    } else if (isSelected) {
+                                        buttonClass += "border-indigo-500 bg-indigo-50 text-indigo-800";
+                                    } else {
+                                        buttonClass += "border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer";
+                                    }
+
+                                    return (
+                                        <button
+                                            key={option}
+                                            onClick={() => !showResult && handleAnswerSelect(option)}
+                                            disabled={showResult}
+                                            className={buttonClass}
+                                        >
+                                            <div className="flex items-start space-x-3">
+                                                <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                                                    showAnswer && isCorrect 
+                                                        ? 'bg-green-500 text-white' 
+                                                        : showAnswer && isSelected && !isCorrect
+                                                        ? 'bg-red-500 text-white'
+                                                        : isSelected 
+                                                        ? 'bg-indigo-500 text-white' 
+                                                        : 'bg-gray-300 text-gray-600'
+                                                }`}>
+                                                    {option}
+                                                </span>
+                                                <span className="flex-1">{optionText}</span>
+                                                {showAnswer && isCorrect && (
+                                                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                                                )}
+                                                {showAnswer && isSelected && !isCorrect && (
+                                                    <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                )}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* 答案解析 */}
+                            {showResult && (
+                                <div className={`p-4 rounded-lg mb-6 ${
+                                    userAnswers[currentQuestion.number] === currentQuestion.answer 
+                                        ? 'bg-green-50 border border-green-200' 
+                                        : 'bg-red-50 border border-red-200'
+                                }`}>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        {userAnswers[currentQuestion.number] === currentQuestion.answer ? (
+                                            <CheckCircle className="h-5 w-5 text-green-600" />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-red-600" />
+                                        )}
+                                        <span className={`font-medium ${
+                                            userAnswers[currentQuestion.number] === currentQuestion.answer 
+                                                ? 'text-green-800' 
+                                                : 'text-red-800'
+                                        }`}>
+                                            {userAnswers[currentQuestion.number] === currentQuestion.answer ? '回答正確！' : '回答錯誤'}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-700">
+                                        正確答案是：<span className="font-medium">{currentQuestion.answer}</span> - {currentQuestion[`option${currentQuestion.answer}`]}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* 導航按鈕 */}
+                            <div className="flex justify-between items-center">
+                                <button
+                                    onClick={goToPreviousQuestion}
+                                    disabled={currentQuestionIndex === 0}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    <span>上一題</span>
+                                </button>
+
+                                <div className="text-sm text-gray-500 text-center">
+                                    <div>第 {currentQuestionIndex + 1} 題，共 {totalQuestions} 題</div>
+                                    {answeredCount > 0 && (
+                                        <div className="mt-1">
+                                            已完成 {answeredCount} 題，答對 {calculateScore()} 題
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={goToNextQuestion}
+                                    disabled={currentQuestionIndex === totalQuestions - 1}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                                >
+                                    <span>下一題</span>
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
+
+                            {/* 完成提示 */}
+                            {answeredCount === totalQuestions && (
+                                <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">🎉</div>
+                                    <h3 className="text-lg font-medium text-gray-800 mb-2">恭喜完成！</h3>
+                                    <p className="text-gray-600">
+                                        您已完成所有 {totalQuestions} 題練習，
+                                        總答對率：<span className="font-bold text-green-600">{getScorePercentage()}%</span>
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        繼續努力！點擊「重新開始」進行更多練習
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 頁腳 */}
+                    <footer className="bg-white border-t mt-8">
+                        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+                            <p>ERP 刷題練習網站 • 示例版本包含前50題</p>
+                            <p className="mt-1">支援鍵盤快捷鍵：A/B/C/D選擇答案，←→切換題目</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // 渲染應用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(ERPQuizApp));
+    </script>
+</body>
+</html>
