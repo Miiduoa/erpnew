@@ -422,6 +422,105 @@
             color: var(--primary-blue);
         }
 
+        /* Browse Panel Styles */
+        .browse-item {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .browse-item:hover {
+            background: white;
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow);
+        }
+
+        .browse-question-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .browse-question-number {
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .browse-chapter {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .browse-question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+
+        .browse-options {
+            margin-bottom: 1rem;
+        }
+
+        .browse-option {
+            padding: 0.5rem 0;
+            color: var(--gray-700);
+            border-left: 3px solid transparent;
+            padding-left: 1rem;
+        }
+
+        .browse-option.correct-answer {
+            background: var(--light-green);
+            border-left-color: var(--success-green);
+            font-weight: 500;
+            color: var(--success-green);
+        }
+
+        .browse-answer {
+            background: var(--success-green);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .chapter-filter, #chapter-filter {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-filter:hover, #chapter-filter:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .chapter-filter:focus, #chapter-filter:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
         /* File Upload Styles */
         .file-upload-area {
             border: 2px dashed var(--primary-blue);
@@ -474,6 +573,21 @@
             .question-selector {
                 justify-content: center;
             }
+
+            .browse-question-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .browse-item {
+                padding: 1rem;
+            }
+
+            .chapter-filter, #chapter-filter {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
@@ -502,6 +616,7 @@
         <nav class="nav-tabs">
             <button class="nav-tab active" onclick="showPanel('overview')">題庫總覽</button>
             <button class="nav-tab" onclick="showPanel('practice')">開始刷題</button>
+            <button class="nav-tab" onclick="showPanel('browse')">題庫瀏覽</button>
             <button class="nav-tab" onclick="showPanel('results')">答題統計</button>
         </nav>
 
@@ -541,6 +656,27 @@
                 </div>
                 <div class="overview-grid" id="overview-grid">
                     <!-- 題目編號將由JavaScript生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 題庫瀏覽面板 -->
+        <div id="browse-panel" class="panel">
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-info">
+                        <h3>📖 題庫瀏覽模式</h3>
+                        <span class="question-badge chapter" id="browse-filter">所有章節</span>
+                    </div>
+                    <div>
+                        <select id="chapter-filter" onchange="filterByChapter()" class="btn btn-secondary">
+                            <option value="">所有章節</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="browse-container" style="max-height: 70vh; overflow-y: auto;">
+                    <!-- 題目瀏覽內容將由JavaScript生成 -->
                 </div>
             </div>
         </div>
@@ -628,7 +764,10 @@
                 return;
             }
             
+            // 初始化所有功能
             generateOverview();
+            generateBrowseContent();
+            generateChapterFilter();
             showQuestion(0);
             updateStats();
             
@@ -739,29 +878,35 @@
                     }
                 }
                 
-                // 收集選項
+                // 收集選項 - 改進版本
                 const startIndex = currentQ.lineIndex + 1;
                 const endIndex = nextQ ? nextQ.lineIndex : lines.length;
+                let optionCollectionPhase = true;
                 
-                for (let j = startIndex; j < endIndex; j++) {
+                for (let j = startIndex; j < endIndex && optionCollectionPhase; j++) {
                     const line = lines[j];
                     
-                    // 跳過標題行
+                    // 跳過標題行和章節行
                     if (line.includes("ERP 規劃師") || 
                         line.includes("試 題 指 南") || 
                         line.includes("ERP規劃師-參考題型") ||
-                        line.includes("中華企業資源規劃學會")) {
+                        line.includes("中華企業資源規劃學會") ||
+                        (line.includes("第") && line.includes("章"))) {
                         continue;
                     }
                     
-                    // 檢查選項格式
-                    if (line.match(/^\([A-D]\)\s+[^0-9]/)) {
-                        options.push(line);
-                        continue;
-                    }
-                    
-                    // 如果不是選項且不是題目，可能是題目內容延續
-                    if (!line.match(/^\([A-D]\)/) && options.length === 0 && !line.includes("章")) {
+                    // 檢查選項格式 - 更寬鬆的匹配
+                    if (line.match(/^\([A-D]\)/)) {
+                        // 如果是下一題的題目行，停止收集選項
+                        if (line.match(/^\([A-D]\)\s*\d+\./)) {
+                            optionCollectionPhase = false;
+                            break;
+                        } else {
+                            // 這是選項行
+                            options.push(line);
+                        }
+                    } else if (options.length === 0 && !line.match(/^\([A-D]\)/)) {
+                        // 如果還沒開始收集選項且這不是選項行，可能是題目內容延續
                         questionText += " " + line;
                     }
                 }
@@ -776,6 +921,8 @@
                         chapter: currentChapter || "第 1 章 企業資源規劃簡介"
                     });
                     processedCount++;
+                } else {
+                    console.log(`題目 ${currentQ.questionId} 選項不足 (${options.length} 個):`, options);
                 }
             }
             
@@ -784,7 +931,73 @@
             console.log(`CSV解析完成，成功處理 ${processedCount} 道題目`);
         }
 
-        // 上傳CSV文件
+        // 生成題庫瀏覽內容
+        function generateBrowseContent(filteredQuestions = null) {
+            const container = document.getElementById('browse-container');
+            const questionsToShow = filteredQuestions || questions;
+            
+            if (questionsToShow.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--gray-600);">沒有找到符合條件的題目</p>';
+                return;
+            }
+            
+            container.innerHTML = questionsToShow.map(q => {
+                const optionsHtml = q.options.map(option => {
+                    const optionLetter = option.match(/^\(([A-D])\)/)[1];
+                    const optionText = option.replace(/^\([A-D]\)\s*/, '');
+                    const isCorrect = optionLetter === q.answer;
+                    
+                    return `
+                        <div class="browse-option ${isCorrect ? 'correct-answer' : ''}">
+                            <strong>${optionLetter})</strong> ${optionText}
+                            ${isCorrect ? ' ✓' : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="browse-item">
+                        <div class="browse-question-header">
+                            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                                <div class="browse-question-number">題目 ${q.id}</div>
+                                <div class="browse-chapter">${q.chapter}</div>
+                            </div>
+                            <div class="browse-answer">答案: ${q.answer}</div>
+                        </div>
+                        
+                        <div class="browse-question-text">${q.question}</div>
+                        
+                        <div class="browse-options">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 生成章節篩選選項
+        function generateChapterFilter() {
+            const select = document.getElementById('chapter-filter');
+            const chapters = [...new Set(questions.map(q => q.chapter))].sort();
+            
+            select.innerHTML = '<option value="">所有章節</option>' + 
+                chapters.map(chapter => `<option value="${chapter}">${chapter}</option>`).join('');
+        }
+
+        // 按章節篩選
+        function filterByChapter() {
+            const selectedChapter = document.getElementById('chapter-filter').value;
+            const filterBadge = document.getElementById('browse-filter');
+            
+            if (selectedChapter) {
+                const filteredQuestions = questions.filter(q => q.chapter === selectedChapter);
+                generateBrowseContent(filteredQuestions);
+                filterBadge.textContent = selectedChapter;
+            } else {
+                generateBrowseContent();
+                filterBadge.textContent = '所有章節';
+            }
+        }
         function uploadCSVFile() {
             const fileInput = document.getElementById('csv-file-upload');
             const file = fileInput.files[0];
@@ -861,13 +1074,13 @@
                 },
                 {
                     id: 11,
-                    question: "在銷售與配銷模組中，下列何者為企業從事行銷作業時最常用的策略",
+                    question: "在銷售與配銷模組中，下列何者為企業從事行銷作業(Marketing Activity)時，最常用而且為最有效的方式",
                     answer: "A",
                     options: [
-                        "(A) 市場區隔策略",
-                        "(B) 產品差異化策略",
-                        "(C) 成本領導策略",
-                        "(D) 集中化策略"
+                        "(A) 直效郵遞 (Direct Mailing, DM)",
+                        "(B) 研討會",
+                        "(C) 銷售電話",
+                        "(D) 銷售講座"
                     ],
                     chapter: "第 3 章 銷售與配銷模組"
                 },
@@ -1272,6 +1485,12 @@
             
             // 激活對應標籤
             event.target.classList.add('active');
+            
+            // 如果切換到瀏覽面板且還沒生成內容，重新生成
+            if (panelName === 'browse' && document.getElementById('browse-container').innerHTML === '') {
+                generateBrowseContent();
+                generateChapterFilter();
+            }
         }
 
         // 鍵盤快捷鍵
