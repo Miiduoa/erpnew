@@ -480,7 +480,7 @@
 <body>
     <header class="header">
         <div class="header-content">
-            <div class="logo">📚 ERP規劃師刷題系統</div>
+            <div class="logo">📚 ERP規劃師刷題系統 (完整版)</div>
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-number" id="correctCount">0</div>
@@ -510,17 +510,17 @@
             <!-- 文件上傳區域 -->
             <div class="question-card" id="upload-section">
                 <div class="question-header">
-                    <h3>📁 題庫文件上傳</h3>
+                    <h3>📁 題庫檔案上傳 (備用選項)</h3>
                 </div>
                 <div class="file-upload-area">
-                    <div>📄 請選擇您的 ERP_Questions.csv 文件</div>
+                    <div>📄 系統已自動嘗試載入題庫，如需手動上傳請選擇CSV文件</div>
                     <input type="file" id="csv-file-upload" accept=".csv">
                     <div>
-                        <button class="btn btn-primary" onclick="uploadCSVFile()">上傳CSV題庫文件</button>
+                        <button class="btn btn-primary" onclick="uploadCSVFile()">手動上傳CSV題庫文件</button>
                     </div>
                     <p style="margin-top: 1rem; color: var(--gray-600); font-size: 0.9rem;">
-                        <strong>目前使用演示題庫（10題）</strong><br>
-                        上傳完整CSV文件後可獲得452道ERP規劃師考試題目
+                        <strong>當前為演示模式</strong><br>
+                        如果自動載入失敗，可手動上傳 ERP_Questions.csv 文件
                     </p>
                 </div>
             </div>
@@ -619,12 +619,12 @@
         // 初始化
         async function init() {
             // 顯示載入提示
-            document.getElementById('question-text').textContent = '正在載入題目，請稍候...';
+            document.getElementById('question-text').textContent = '正在載入ERP題庫，請稍候...';
             
             await loadQuestions();
             
             if (questions.length === 0) {
-                document.getElementById('question-text').textContent = '無法載入題目，請上傳CSV文件或重新整理頁面。';
+                document.getElementById('question-text').textContent = '載入失敗，請重新整理頁面或手動上傳CSV文件。';
                 return;
             }
             
@@ -632,41 +632,63 @@
             showQuestion(0);
             updateStats();
             
-            // 顯示載入完成信息
-            if (questions.length <= 10) {
-                showNotification(`當前為演示模式 (${questions.length} 題)，請上傳CSV文件獲得完整題庫！📁`, 'success');
-            } else {
-                showNotification(`成功載入 ${questions.length} 道題目！🎉`, 'success');
-                // 如果成功載入完整題庫，隱藏上傳區域
+            // 根據載入的題目數量決定顯示模式
+            if (questions.length >= 400) {
+                // 成功載入完整題庫
                 document.getElementById('upload-section').style.display = 'none';
+                showNotification(`🎉 成功載入完整ERP題庫 (${questions.length} 題)！`, 'success');
+            } else if (questions.length > 50) {
+                // 載入了部分題庫
+                document.getElementById('upload-section').style.display = 'none';
+                showNotification(`✅ 載入ERP題庫 (${questions.length} 題)`, 'success');
+            } else {
+                // 只有演示題目，顯示上傳區域
+                showNotification(`📁 當前為演示模式 (${questions.length} 題)，建議上傳完整CSV文件`, 'success');
             }
         }
 
         // 載入題目數據
         async function loadQuestions() {
             try {
-                // 首先嘗試從文件系統讀取CSV
-                if (window.fs && window.fs.readFile) {
-                    const csvContent = await window.fs.readFile('ERP_Questions.csv', { encoding: 'utf8' });
+                // 首先嘗試從同目錄讀取CSV文件（部署時使用）
+                console.log('嘗試載入CSV文件...');
+                const response = await fetch('./ERP_Questions.csv');
+                
+                if (response.ok) {
+                    const csvContent = await response.text();
+                    console.log('成功讀取CSV文件');
                     parseCSVContent(csvContent);
+                    
                     if (questions.length > 0) {
                         console.log(`從CSV成功載入 ${questions.length} 道題目`);
                         return;
                     }
                 }
                 
-                // 如果無法讀取文件，使用內建的示例題目
-                loadSampleQuestions();
+                // 如果fetch失敗，嘗試使用文件系統API
+                if (window.fs && window.fs.readFile) {
+                    console.log('嘗試使用文件系統API...');
+                    const csvContent = await window.fs.readFile('ERP_Questions.csv', { encoding: 'utf8' });
+                    parseCSVContent(csvContent);
+                    if (questions.length > 0) {
+                        console.log(`從文件系統成功載入 ${questions.length} 道題目`);
+                        return;
+                    }
+                }
                 
             } catch (error) {
-                console.error('載入題目失敗:', error);
-                loadSampleQuestions();
+                console.log('自動載入失敗，將使用演示模式:', error.message);
             }
+            
+            // 如果所有自動載入方式都失敗，載入演示題目
+            loadSampleQuestions();
         }
 
         // 解析CSV內容
         function parseCSVContent(csvContent) {
+            console.log('開始解析CSV內容...');
             const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line && line !== 'Content');
+            console.log(`CSV總行數: ${lines.length}`);
             
             let currentChapter = "";
             const questionLines = [];
@@ -679,7 +701,7 @@
                     const questionId = parseInt(match[2]);
                     const questionText = match[3];
                     
-                    if (questionId >= 1 && questionId <= 452) {
+                    if (questionId >= 1 && questionId <= 500) {
                         questionLines.push({
                             lineIndex: index,
                             questionId: questionId,
@@ -691,10 +713,13 @@
                 }
             });
             
+            console.log(`找到 ${questionLines.length} 道題目行`);
+            
             // 按題目ID排序
             questionLines.sort((a, b) => a.questionId - b.questionId);
             
             // 為每道題目收集選項和章節信息
+            let processedCount = 0;
             for (let i = 0; i < questionLines.length; i++) {
                 const currentQ = questionLines[i];
                 const nextQ = questionLines[i + 1];
@@ -750,11 +775,13 @@
                         options: options,
                         chapter: currentChapter || "第 1 章 企業資源規劃簡介"
                     });
+                    processedCount++;
                 }
             }
             
             // 按題目編號排序
             questions.sort((a, b) => a.id - b.id);
+            console.log(`CSV解析完成，成功處理 ${processedCount} 道題目`);
         }
 
         // 上傳CSV文件
@@ -833,31 +860,31 @@
                     chapter: "第 1 章 企業資源規劃簡介"
                 },
                 {
-                    id: 3,
-                    question: "對 ERP 系統而言，下列敘述何者為非",
+                    id: 11,
+                    question: "在銷售與配銷模組中，下列何者為企業從事行銷作業時最常用的策略",
                     answer: "A",
                     options: [
-                        "(A) ERP 強調的是資料的整合，而即時性並不重要",
-                        "(B) ERP 系統採主從式(Client-Server)架構",
-                        "(C) ERP 系統為企業 e 化核心",
-                        "(D) ERP 乃是一財務會計導向的資訊系統"
+                        "(A) 市場區隔策略",
+                        "(B) 產品差異化策略",
+                        "(C) 成本領導策略",
+                        "(D) 集中化策略"
                     ],
-                    chapter: "第 1 章 企業資源規劃簡介"
+                    chapter: "第 3 章 銷售與配銷模組"
                 },
                 {
-                    id: 4,
-                    question: "以下何種模組所負責的業務部份較不屬於 ERP 的範籌",
-                    answer: "C",
+                    id: 78,
+                    question: "以下何者不是生產規劃的目的",
+                    answer: "A",
                     options: [
-                        "(A) 倉儲管理",
-                        "(B) 財務模組",
-                        "(C) 製造現場控制(SFC)",
-                        "(D) 銷售/配送模組"
+                        "(A) 增加產品種類",
+                        "(B) 降低生產成本",
+                        "(C) 提高生產效率",
+                        "(D) 確保交期準確"
                     ],
-                    chapter: "第 1 章 企業資源規劃簡介"
+                    chapter: "第 4 章 生產規劃與控制"
                 },
                 {
-                    id: 5,
+                    id: 133,
                     question: "下列何者不是影響企業採購發展趨勢的因素",
                     answer: "A",
                     options: [
@@ -869,7 +896,7 @@
                     chapter: "第 5 章 企業之採購管理"
                 },
                 {
-                    id: 6,
+                    id: 186,
                     question: "在庫存管理系統中，ABC 分析法是利用何種法則發展出來的存貨分類方法",
                     answer: "C",
                     options: [
@@ -881,7 +908,7 @@
                     chapter: "第 6 章 庫存管理系統"
                 },
                 {
-                    id: 7,
+                    id: 269,
                     question: "財務會計作業的主要目的為",
                     answer: "B",
                     options: [
@@ -893,7 +920,7 @@
                     chapter: "第 7 章 ERP 財務會計模組"
                 },
                 {
-                    id: 8,
+                    id: 310,
                     question: "在成本控制模組中，下列何者屬於變動成本",
                     answer: "A",
                     options: [
@@ -905,7 +932,7 @@
                     chapter: "第 8 章 成本控制模組"
                 },
                 {
-                    id: 9,
+                    id: 360,
                     question: "人力資源管理模組的主要功能不包括",
                     answer: "D",
                     options: [
@@ -917,7 +944,7 @@
                     chapter: "第 9 章 人力資源模組"
                 },
                 {
-                    id: 10,
+                    id: 394,
                     question: "ERP 系統導入過程中，最重要的成功因素為",
                     answer: "B",
                     options: [
@@ -927,9 +954,33 @@
                         "(D) 成本控制嚴格"
                     ],
                     chapter: "第 11 章 系統導入"
+                },
+                {
+                    id: 408,
+                    question: "雲端運算具有下列哪些基本特性",
+                    answer: "A",
+                    options: [
+                        "(A) 隨選即用的自助服務",
+                        "(B) 固定的資源配置",
+                        "(C) 單一存取方式",
+                        "(D) 人工資源管理"
+                    ],
+                    chapter: "第 14 章 企業雲端運算與應用"
+                },
+                {
+                    id: 433,
+                    question: "ERP 系統必須建置在一套穩定的資料庫系統之上，下列何者不是資料庫軟體",
+                    answer: "B",
+                    options: [
+                        "(A) Oracle",
+                        "(B) Windows",
+                        "(C) SQL Server",
+                        "(D) MySQL"
+                    ],
+                    chapter: "第 16 章 資料庫管理與 ERP 系統"
                 }
             ];
-            console.log(`載入了 ${questions.length} 道示例題目（演示模式）`);
+            console.log(`載入了 ${questions.length} 道示例題目（演示模式 - 涵蓋各主要章節）`);
         }
 
         // 生成題庫總覽網格
