@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP規劃師刷題系統 - 完整版</title>
+    <title>ERP規劃師刷題系統 - 智能記憶版</title>
     <style>
         * {
             margin: 0;
@@ -544,6 +544,211 @@
             background: white;
         }
 
+        /* Memory Mode Styles */
+        .memory-mode {
+            display: none;
+        }
+
+        .memory-mode.active {
+            display: block;
+        }
+
+        .memory-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .memory-stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .memory-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .memory-stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .memory-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .flashcard {
+            max-width: 600px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .flashcard-front, .flashcard-back {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            transition: all 0.6s ease;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--light-blue) 0%, white 100%);
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, var(--light-green) 0%, white 100%);
+        }
+
+        .card-question-info {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .card-question-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--gray-800);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flip-btn {
+            align-self: center;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 25px;
+        }
+
+        .card-options {
+            margin: 1.5rem 0;
+        }
+
+        .card-option {
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            background: var(--gray-50);
+            border-left: 4px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .card-option.correct {
+            background: var(--light-green);
+            border-left-color: var(--success-green);
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .card-option.highlighted {
+            background: var(--light-blue);
+            border-left-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .difficulty-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .difficulty-buttons .btn {
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-error {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .btn-error:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        .keyword-highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+            margin: 0 0.1rem;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .memory-tip {
+            background: var(--light-orange);
+            border: 1px solid var(--warning-orange);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .memory-tip::before {
+            content: "💡";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: white;
+            padding: 0 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .association-link {
+            background: var(--light-blue);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            display: inline-block;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .association-link:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--success-green) 0deg, var(--gray-200) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--gray-800);
+            margin: 0 auto 1rem;
+        }
+
         /* Wrong Questions Practice Styles */
         .wrong-practice-welcome {
             text-align: center;
@@ -657,17 +862,58 @@
                 padding: 1rem;
             }
 
-            .chapter-filter, #chapter-filter {
+            .chapter-filter, #chapter-filter, #memory-mode-select {
                 width: 100%;
                 margin-bottom: 1rem;
             }
+
+            .memory-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .memory-stat-card {
+                padding: 1rem;
+            }
+
+            .flashcard-front, .flashcard-back {
+                padding: 1.5rem;
+                min-height: 250px;
+            }
+
+            .card-question-text {
+                font-size: 1rem;
+                min-height: 80px;
+            }
+
+            .difficulty-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .difficulty-buttons .btn {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .keyword-highlight {
+                padding: 0.1rem 0.2rem;
+                font-size: 0.9rem;
+            }
+
+            .association-link {
+                padding: 0.4rem 0.8rem;
+                margin: 0.25rem;
+                font-size: 0.85rem;
+            }
+        }
         }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-content">
-            <div class="logo">📚 ERP規劃師刷題系統 (完整版)</div>
+            <div class="logo">🧠 ERP規劃師刷題系統 (智能記憶版)</div>
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-number" id="correctCount">0</div>
@@ -695,6 +941,7 @@
             <button class="nav-tab active" onclick="showPanel('overview')">題庫總覽</button>
             <button class="nav-tab" onclick="showPanel('practice')">開始刷題</button>
             <button class="nav-tab" onclick="showPanel('browse')">題庫瀏覽</button>
+            <button class="nav-tab" onclick="showPanel('memory')">記憶模式</button>
             <button class="nav-tab" onclick="showPanel('wrong')">錯題練習</button>
             <button class="nav-tab" onclick="showPanel('results')">答題統計</button>
             <button class="nav-tab" onclick="showPanel('debug')" id="debug-tab" style="display: none;">調試信息</button>
@@ -788,6 +1035,116 @@
                         <button class="btn btn-secondary" onclick="previousQuestion()" id="prev-btn">上一題</button>
                         <button class="btn btn-primary" onclick="nextQuestion()" id="next-btn">下一題</button>
                         <button class="btn btn-success" onclick="submitAnswer()" id="submit-btn" style="display:none;">確認答案</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 記憶模式面板 -->
+        <div id="memory-panel" class="panel">
+            <div class="question-card">
+                <div class="question-header">
+                    <h3>🧠 智能記憶模式</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <select id="memory-mode-select" class="chapter-filter" onchange="changeMemoryMode()">
+                            <option value="flashcard">記憶卡片</option>
+                            <option value="keyword">關鍵詞記憶</option>
+                            <option value="association">聯想記憶</option>
+                            <option value="spaced">間隔重複</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="startMemoryPractice()">開始記憶練習</button>
+                    </div>
+                </div>
+                
+                <!-- 記憶卡片模式 -->
+                <div id="flashcard-mode" class="memory-mode active">
+                    <div class="memory-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="memory-stat-card">
+                            <div class="memory-stat-number" id="memory-total">0</div>
+                            <div class="memory-stat-label">待記憶</div>
+                        </div>
+                        <div class="memory-stat-card">
+                            <div class="memory-stat-number" style="color: var(--success-green);" id="memory-mastered">0</div>
+                            <div class="memory-stat-label">已掌握</div>
+                        </div>
+                        <div class="memory-stat-card">
+                            <div class="memory-stat-number" style="color: var(--warning-orange);" id="memory-learning">0</div>
+                            <div class="memory-stat-label">學習中</div>
+                        </div>
+                        <div class="memory-stat-card">
+                            <div class="memory-stat-number" style="color: var(--error-red);" id="memory-difficult">0</div>
+                            <div class="memory-stat-label">困難題</div>
+                        </div>
+                    </div>
+                    
+                    <div id="flashcard-container">
+                        <div class="flashcard" id="memory-card">
+                            <div class="flashcard-front" id="card-front">
+                                <div class="card-question-info">
+                                    <span class="question-badge number" id="memory-question-badge">題目 1</span>
+                                    <span class="question-badge chapter" id="memory-chapter-badge">載入中...</span>
+                                </div>
+                                <div class="card-question-text" id="memory-question-text">點擊「開始記憶練習」開始學習</div>
+                                <button class="btn btn-primary flip-btn" onclick="flipCard()">顯示答案</button>
+                                <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
+                                    💡 快捷鍵：空格翻轉卡片
+                                </div>
+                            </div>
+                            
+                            <div class="flashcard-back" id="card-back" style="display: none;">
+                                <div class="card-question-text" id="memory-answer-text">答案和解析</div>
+                                <div class="card-options" id="memory-card-options"></div>
+                                <div class="difficulty-buttons">
+                                    <button class="btn btn-error" onclick="markDifficulty('hard')">😰 困難 <small>(1)</small></button>
+                                    <button class="btn btn-secondary" onclick="markDifficulty('medium')">🤔 一般 <small>(2)</small></button>
+                                    <button class="btn btn-success" onclick="markDifficulty('easy')">😊 簡單 <small>(3)</small></button>
+                                    <button class="btn btn-primary" onclick="markDifficulty('mastered')">🎯 已掌握 <small>(4)</small></button>
+                                </div>
+                                <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
+                                    💡 快捷鍵：數字鍵1-4選擇難度，→下一張
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 關鍵詞記憶模式 -->
+                <div id="keyword-mode" class="memory-mode" style="display: none;">
+                    <div class="keyword-practice">
+                        <div id="keyword-content">
+                            <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                                關鍵詞記憶模式將自動識別題目中的重要詞彙並高亮顯示，幫助你快速記憶核心概念。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 聯想記憶模式 -->
+                <div id="association-mode" class="memory-mode" style="display: none;">
+                    <div class="association-practice">
+                        <div id="association-content">
+                            <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                                聯想記憶模式將為你提供概念間的關聯提示，建立知識網路，增強記憶效果。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 間隔重複模式 -->
+                <div id="spaced-mode" class="memory-mode" style="display: none;">
+                    <div class="spaced-practice">
+                        <div id="spaced-content">
+                            <div style="text-align: center; padding: 2rem;">
+                                <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">📅 間隔重複學習法</h4>
+                                <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                                    基於艾賓浩斯遺忘曲線，系統會在最佳時機提醒你復習，提高長期記憶效果。
+                                </p>
+                                <div id="spaced-schedule" style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px;">
+                                    <h5 style="margin-bottom: 1rem;">今日復習計劃</h5>
+                                    <div id="spaced-today-list">載入中...</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -961,6 +1318,14 @@
             indicator.style.opacity = '1';
             indicator.style.transform = 'translateY(0)';
             
+            // 添加記憶數據統計
+            const memoryCount = Object.keys(memoryData).length;
+            const masteredCount = Object.values(memoryData).filter(d => d.difficulty === 'mastered').length;
+            
+            if (memoryCount > 0) {
+                indicator.title = `記憶數據：${memoryCount}題，已掌握：${masteredCount}題`;
+            }
+            
             setTimeout(() => {
                 indicator.style.opacity = '0.6';
                 indicator.style.transform = 'translateY(10px)';
@@ -1015,8 +1380,9 @@
                 return;
             }
             
-            // 載入保存的答題記錄
+            // 載入保存的答題記錄和記憶數據
             loadSavedData();
+            loadMemoryData();
             
             // 初始化所有功能
             generateOverview();
@@ -1026,6 +1392,7 @@
             updateStats();
             updateResults();
             updateWrongQuestionsDisplay();
+            updateMemoryStats();
             
             // 檢查題目質量並報告
             checkQuestionQuality();
@@ -1046,9 +1413,10 @@
             
             // 顯示恢復記錄的提示
             const savedCount = Object.keys(userAnswers).length;
-            if (savedCount > 0) {
+            const memoryCount = Object.keys(memoryData).length;
+            if (savedCount > 0 || memoryCount > 0) {
                 setTimeout(() => {
-                    showNotification(`💾 已恢復 ${savedCount} 道題的答題記錄`, 'success');
+                    showNotification(`💾 已恢復 ${savedCount} 道答題記錄，${memoryCount} 道記憶記錄`, 'success');
                 }, 2000);
             }
         }
@@ -1779,7 +2147,304 @@
             }
         }
 
-        // 錯題練習相關函數
+        // 記憶模式相關變量
+        let memoryData = {};  // 記憶數據：{questionId: {difficulty, lastReview, nextReview, reviews}}
+        let currentMemoryIndex = 0;
+        let memoryQuestions = [];
+        let currentMemoryMode = 'flashcard';
+        let isCardFlipped = false;
+
+        const MEMORY_STORAGE_KEY = 'erp_memory_data';
+        const DIFFICULTY_INTERVALS = {
+            'hard': 1,      // 1天後復習
+            'medium': 3,    // 3天後復習  
+            'easy': 7,      // 7天後復習
+            'mastered': 30  // 30天後復習
+        };
+
+        // ERP關鍵詞庫
+        const ERP_KEYWORDS = [
+            'ERP', '企業資源規劃', '銷售', '配銷', '採購', '庫存', '生產', '財務', '人力資源',
+            '模組', '系統', '流程', '管理', '控制', '規劃', '訂單', '客戶', '供應商',
+            '資料庫', '整合', '即時', '成本', '預算', '分析', '報表', '作業', '效率',
+            'Make to Order', 'Make to Stock', 'MRP', 'BOM', 'ATP', 'EOQ', 'ABC分析',
+            '主生產排程', '物料需求規劃', '工作中心', '途程', '品質', '安全存量'
+        ];
+
+        // 載入記憶數據
+        function loadMemoryData() {
+            memoryData = loadFromStorage(MEMORY_STORAGE_KEY, {});
+            console.log(`載入記憶數據: ${Object.keys(memoryData).length} 個題目記錄`);
+        }
+
+        // 保存記憶數據
+        function saveMemoryData() {
+            saveToStorage(MEMORY_STORAGE_KEY, memoryData);
+            showMemoryStatus('記憶數據已保存');
+        }
+
+        // 切換記憶模式
+        function changeMemoryMode() {
+            const mode = document.getElementById('memory-mode-select').value;
+            currentMemoryMode = mode;
+            
+            // 隱藏所有模式
+            document.querySelectorAll('.memory-mode').forEach(mode => {
+                mode.classList.remove('active');
+            });
+            
+            // 顯示選中的模式
+            document.getElementById(`${mode}-mode`).classList.add('active');
+            
+            // 重新初始化當前模式
+            if (mode === 'flashcard') {
+                updateMemoryStats();
+            } else if (mode === 'keyword') {
+                initKeywordMode();
+            } else if (mode === 'association') {
+                initAssociationMode();
+            } else if (mode === 'spaced') {
+                initSpacedMode();
+            }
+        }
+
+        // 開始記憶練習
+        function startMemoryPractice() {
+            if (questions.length === 0) {
+                showNotification('請先載入題庫！', 'error');
+                return;
+            }
+            
+            // 準備記憶題目（優先顯示需要復習的）
+            prepareMemoryQuestions();
+            
+            if (memoryQuestions.length === 0) {
+                showNotification('所有題目都已掌握！', 'success');
+                return;
+            }
+            
+            currentMemoryIndex = 0;
+            showMemoryCard(currentMemoryIndex);
+            updateMemoryStats();
+        }
+
+        // 準備記憶題目
+        function prepareMemoryQuestions() {
+            const today = new Date().toDateString();
+            
+            memoryQuestions = questions.filter(q => {
+                const memoryInfo = memoryData[q.id];
+                if (!memoryInfo) return true; // 新題目
+                if (memoryInfo.difficulty === 'mastered' && memoryInfo.nextReview > today) return false;
+                return memoryInfo.nextReview <= today; // 需要復習的題目
+            });
+            
+            // 按難度排序：困難的優先
+            memoryQuestions.sort((a, b) => {
+                const difficultyOrder = {'hard': 0, 'medium': 1, 'easy': 2, 'mastered': 3};
+                const aDiff = memoryData[a.id]?.difficulty || 'medium';
+                const bDiff = memoryData[b.id]?.difficulty || 'medium';
+                return difficultyOrder[aDiff] - difficultyOrder[bDiff];
+            });
+            
+            console.log(`準備記憶練習: ${memoryQuestions.length} 道題目`);
+        }
+
+        // 顯示記憶卡片
+        function showMemoryCard(index) {
+            if (index < 0 || index >= memoryQuestions.length) return;
+            
+            const question = memoryQuestions[index];
+            isCardFlipped = false;
+            
+            // 顯示正面
+            document.getElementById('card-front').style.display = 'flex';
+            document.getElementById('card-back').style.display = 'none';
+            
+            // 更新卡片內容
+            document.getElementById('memory-question-badge').textContent = `題目 ${question.id}`;
+            document.getElementById('memory-chapter-badge').textContent = question.chapter;
+            
+            // 根據模式顯示題目
+            if (currentMemoryMode === 'keyword') {
+                document.getElementById('memory-question-text').innerHTML = highlightKeywords(question.question);
+            } else {
+                document.getElementById('memory-question-text').textContent = question.question;
+            }
+        }
+
+        // 翻轉卡片
+        function flipCard() {
+            if (memoryQuestions.length === 0) return;
+            
+            const question = memoryQuestions[currentMemoryIndex];
+            isCardFlipped = !isCardFlipped;
+            
+            if (isCardFlipped) {
+                // 顯示背面（答案）
+                document.getElementById('card-front').style.display = 'none';
+                document.getElementById('card-back').style.display = 'flex';
+                
+                // 更新答案內容
+                document.getElementById('memory-answer-text').innerHTML = 
+                    `<strong>正確答案：${question.answer}</strong><br><br>${generateMemoryTip(question)}`;
+                
+                // 顯示選項
+                const optionsHtml = question.options.map(option => {
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (!letterMatch) return '';
+                    
+                    const letter = letterMatch[1];
+                    const text = option.replace(/^\([A-D]\)\s*/, '');
+                    const isCorrect = letter === question.answer;
+                    
+                    return `
+                        <div class="card-option ${isCorrect ? 'correct' : ''}">
+                            <strong>${letter})</strong> ${text}
+                            ${isCorrect ? ' ✓' : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('memory-card-options').innerHTML = optionsHtml;
+            } else {
+                // 顯示正面
+                document.getElementById('card-front').style.display = 'flex';
+                document.getElementById('card-back').style.display = 'none';
+            }
+        }
+
+        // 標記難度
+        function markDifficulty(difficulty) {
+            if (memoryQuestions.length === 0) return;
+            
+            const question = memoryQuestions[currentMemoryIndex];
+            const today = new Date();
+            const nextReviewDate = new Date(today);
+            nextReviewDate.setDate(today.getDate() + DIFFICULTY_INTERVALS[difficulty]);
+            
+            // 更新記憶數據
+            if (!memoryData[question.id]) {
+                memoryData[question.id] = {reviews: 0};
+            }
+            
+            memoryData[question.id] = {
+                ...memoryData[question.id],
+                difficulty: difficulty,
+                lastReview: today.toDateString(),
+                nextReview: nextReviewDate.toDateString(),
+                reviews: (memoryData[question.id].reviews || 0) + 1
+            };
+            
+            saveMemoryData();
+            
+            // 給予反饋
+            const feedbackMessages = {
+                'hard': '標記為困難，明天將再次復習 😰',
+                'medium': '標記為一般，3天後復習 🤔', 
+                'easy': '標記為簡單，一週後復習 😊',
+                'mastered': '太棒了！已掌握，一個月後復習 🎯'
+            };
+            
+            showNotification(feedbackMessages[difficulty], 'success');
+            
+            // 移動到下一張卡片
+            setTimeout(() => {
+                nextMemoryCard();
+            }, 1000);
+        }
+
+        // 下一張記憶卡片
+        function nextMemoryCard() {
+            if (currentMemoryIndex < memoryQuestions.length - 1) {
+                currentMemoryIndex++;
+                showMemoryCard(currentMemoryIndex);
+            } else {
+                // 完成這輪練習
+                showNotification('🎉 本輪記憶練習完成！', 'success');
+                prepareMemoryQuestions(); // 重新準備題目
+                if (memoryQuestions.length > 0) {
+                    currentMemoryIndex = 0;
+                    showMemoryCard(0);
+                }
+            }
+            updateMemoryStats();
+        }
+
+        // 更新記憶統計
+        function updateMemoryStats() {
+            const total = questions.length;
+            let mastered = 0, learning = 0, difficult = 0;
+            
+            questions.forEach(q => {
+                const memoryInfo = memoryData[q.id];
+                if (memoryInfo) {
+                    switch(memoryInfo.difficulty) {
+                        case 'mastered': mastered++; break;
+                        case 'hard': difficult++; break;
+                        case 'medium':
+                        case 'easy': learning++; break;
+                    }
+                }
+            });
+            
+            document.getElementById('memory-total').textContent = total - mastered - learning - difficult;
+            document.getElementById('memory-mastered').textContent = mastered;
+            document.getElementById('memory-learning').textContent = learning;
+            document.getElementById('memory-difficult').textContent = difficult;
+        }
+
+        // 關鍵詞高亮
+        function highlightKeywords(text) {
+            let highlightedText = text;
+            
+            ERP_KEYWORDS.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                highlightedText = highlightedText.replace(regex, '<span class="keyword-highlight">$1</span>');
+            });
+            
+            return highlightedText;
+        }
+
+        // 生成記憶提示
+        function generateMemoryTip(question) {
+            const tips = [
+                `💡 記憶提示：注意題目中的關鍵詞「${extractKeywords(question.question)[0] || 'ERP'}」`,
+                `🔗 聯想記憶：這個概念與「${question.chapter.split(' ')[1]}」密切相關`,
+                `📝 口訣提示：選項${question.answer} - 記住第一個字「${getFirstChar(question)}」`,
+                `🎯 重點：此題考查的核心概念是「${extractConcept(question.question)}」`
+            ];
+            
+            return `<div class="memory-tip">${tips[Math.floor(Math.random() * tips.length)]}</div>`;
+        }
+
+        // 提取關鍵詞
+        function extractKeywords(text) {
+            return ERP_KEYWORDS.filter(keyword => 
+                text.toLowerCase().includes(keyword.toLowerCase())
+            );
+        }
+
+        // 獲取正確選項的第一個字
+        function getFirstChar(question) {
+            const correctOption = question.options.find(opt => 
+                opt.match(/^\(([A-D])\)/)[1] === question.answer
+            );
+            if (correctOption) {
+                const text = correctOption.replace(/^\([A-D]\)\s*/, '');
+                return text.charAt(0);
+            }
+            return '';
+        }
+
+        // 提取核心概念
+        function extractConcept(text) {
+            const concepts = ['系統', '模組', '流程', '管理', '規劃', '控制', '分析'];
+            for (let concept of concepts) {
+                if (text.includes(concept)) return concept;
+            }
+            return 'ERP概念';
+        }
         function getWrongQuestions() {
             return questions.filter(q => {
                 const userAnswer = userAnswers[q.id];
@@ -2056,9 +2721,15 @@
             }).length;
             const incorrect = answered - correct;
             
+            // 計算已掌握的題目數量
+            const mastered = Object.values(memoryData).filter(data => 
+                data.difficulty === 'mastered'
+            ).length;
+            
             document.getElementById('correctCount').textContent = correct;
             document.getElementById('incorrectCount').textContent = incorrect;
             document.getElementById('totalAnswered').textContent = answered;
+            document.getElementById('masteredCount').textContent = mastered;
             
             // 更新進度條
             const totalQuestions = questions.length;
@@ -2239,6 +2910,32 @@
                         if (document.getElementById('submit-btn').style.display !== 'none') {
                             submitAnswer();
                         }
+                        break;
+                }
+            } else if (document.getElementById('memory-panel').classList.contains('active')) {
+                // 記憶模式快捷鍵
+                switch(e.key) {
+                    case ' ':  // 空格鍵翻轉卡片
+                        e.preventDefault();
+                        if (memoryQuestions.length > 0) {
+                            flipCard();
+                        }
+                        break;
+                    case '1':
+                        if (isCardFlipped) markDifficulty('hard');
+                        break;
+                    case '2':
+                        if (isCardFlipped) markDifficulty('medium');
+                        break;
+                    case '3':
+                        if (isCardFlipped) markDifficulty('easy');
+                        break;
+                    case '4':
+                        if (isCardFlipped) markDifficulty('mastered');
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (isCardFlipped) nextMemoryCard();
                         break;
                 }
             }
