@@ -618,6 +618,7 @@
             <button class="nav-tab" onclick="showPanel('practice')">開始刷題</button>
             <button class="nav-tab" onclick="showPanel('browse')">題庫瀏覽</button>
             <button class="nav-tab" onclick="showPanel('results')">答題統計</button>
+            <button class="nav-tab" onclick="showPanel('debug')" id="debug-tab" style="display: none;">調試信息</button>
         </nav>
 
         <!-- 題庫總覽面板 -->
@@ -743,6 +744,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- 調試信息面板 -->
+        <div id="debug-panel" class="panel">
+            <div class="question-card">
+                <div class="question-header">
+                    <h3>🔧 題庫調試信息</h3>
+                </div>
+                <div id="debug-content">
+                    <p style="text-align: center; color: var(--gray-600); padding: 2rem;">
+                        載入題庫後將顯示調試信息...
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -771,6 +786,9 @@
             showQuestion(0);
             updateStats();
             
+            // 檢查題目質量並報告
+            checkQuestionQuality();
+            
             // 根據載入的題目數量決定顯示模式
             if (questions.length >= 400) {
                 // 成功載入完整題庫
@@ -784,6 +802,102 @@
                 // 只有演示題目，顯示上傳區域
                 showNotification(`📁 當前為演示模式 (${questions.length} 題)，建議上傳完整CSV文件`, 'success');
             }
+        }
+
+        // 檢查題目質量
+        function checkQuestionQuality() {
+            const problemQuestions = questions.filter(q => !q.options || q.options.length < 2);
+            const incompleteQuestions = questions.filter(q => q.options && q.options.length < 4);
+            const goodQuestions = questions.filter(q => q.options && q.options.length >= 4);
+            
+            console.log(`質量檢查報告:`);
+            console.log(`- 總題目數: ${questions.length}`);
+            console.log(`- 問題題目數 (選項<2): ${problemQuestions.length}`);
+            console.log(`- 不完整題目數 (選項<4): ${incompleteQuestions.length}`);
+            console.log(`- 完整題目數 (選項>=4): ${goodQuestions.length}`);
+            
+            if (problemQuestions.length > 0) {
+                console.log('問題題目編號:', problemQuestions.map(q => q.id));
+            }
+            
+            // 生成調試面板內容
+            generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions);
+            
+            // 如果有問題題目，顯示調試標籤
+            if (problemQuestions.length > 0 || incompleteQuestions.length > 10) {
+                document.getElementById('debug-tab').style.display = 'block';
+            }
+            
+            // 如果問題題目很多，顯示警告
+            if (problemQuestions.length > questions.length * 0.1) {
+                setTimeout(() => {
+                    showNotification(`⚠️ 發現 ${problemQuestions.length} 道題目選項解析有問題，建議檢查CSV格式`, 'error');
+                }, 3000);
+            }
+        }
+
+        // 生成調試內容
+        function generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions) {
+            const debugContainer = document.getElementById('debug-content');
+            
+            const debugHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--success-green);">${goodQuestions.length}</div>
+                        <h4>完整題目 (≥4選項)</h4>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--warning-orange);">${incompleteQuestions.length}</div>
+                        <h4>不完整題目 (<4選項)</h4>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--error-red);">${problemQuestions.length}</div>
+                        <h4>問題題目 (<2選項)</h4>
+                    </div>
+                </div>
+                
+                ${problemQuestions.length > 0 ? `
+                    <div style="background: var(--light-red); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 style="color: var(--error-red); margin-bottom: 1rem;">⚠️ 問題題目列表 (選項<2個)</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            ${problemQuestions.map(q => 
+                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    題目${q.id} (${q.options.length}個選項)
+                                </span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${incompleteQuestions.length > 0 ? `
+                    <div style="background: var(--light-orange); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 style="color: var(--warning-orange); margin-bottom: 1rem;">⚠️ 不完整題目列表 (選項<4個)</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            ${incompleteQuestions.slice(0, 20).map(q => 
+                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    題目${q.id} (${q.options.length}個選項)
+                                </span>`
+                            ).join('')}
+                            ${incompleteQuestions.length > 20 ? 
+                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    ...還有${incompleteQuestions.length - 20}道
+                                </span>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; font-size: 0.9rem;">
+                    <h4 style="margin-bottom: 1rem;">💡 解決建議</h4>
+                    <ul style="line-height: 1.6; margin-left: 1rem;">
+                        <li>如果問題題目很多，請檢查原始CSV文件格式是否正確</li>
+                        <li>確認題目和選項之間是否有空行或其他內容干擾</li>
+                        <li>選項格式應為：(A) 選項內容、(B) 選項內容等</li>
+                        <li>可以嘗試重新上傳CSV文件或聯繫技術支援</li>
+                    </ul>
+                </div>
+            `;
+            
+            debugContainer.innerHTML = debugHtml;
         }
 
         // 載入題目數據
@@ -878,13 +992,14 @@
                     }
                 }
                 
-                // 收集選項 - 改進版本
+                // 收集選項 - 全新的邏輯
                 const startIndex = currentQ.lineIndex + 1;
                 const endIndex = nextQ ? nextQ.lineIndex : lines.length;
-                let optionCollectionPhase = true;
                 
-                for (let j = startIndex; j < endIndex && optionCollectionPhase; j++) {
-                    const line = lines[j];
+                console.log(`\n處理題目 ${currentQ.questionId} (行 ${currentQ.lineIndex + 1})`);
+                
+                for (let j = startIndex; j < endIndex; j++) {
+                    let line = lines[j];
                     
                     // 跳過標題行和章節行
                     if (line.includes("ERP 規劃師") || 
@@ -895,40 +1010,67 @@
                         continue;
                     }
                     
-                    // 檢查選項格式 - 更寬鬆的匹配
-                    if (line.match(/^\([A-D]\)/)) {
-                        // 如果是下一題的題目行，停止收集選項
-                        if (line.match(/^\([A-D]\)\s*\d+\./)) {
-                            optionCollectionPhase = false;
-                            break;
-                        } else {
-                            // 這是選項行
-                            options.push(line);
-                        }
-                    } else if (options.length === 0 && !line.match(/^\([A-D]\)/)) {
-                        // 如果還沒開始收集選項且這不是選項行，可能是題目內容延續
+                    // 清理雙引號
+                    if (line.startsWith('"') && line.endsWith('"')) {
+                        line = line.slice(1, -1);
+                    }
+                    
+                    // 檢查是否為選項行
+                    const isOptionLine = line.match(/^\([A-D]\)/);
+                    const isQuestionLine = line.match(/^\([A-D]\)\s*\d+\./);
+                    
+                    if (isOptionLine && !isQuestionLine) {
+                        // 這是選項行，不是題目行
+                        options.push(line);
+                        console.log(`  找到選項: ${line}`);
+                    } else if (isQuestionLine) {
+                        // 遇到下一題目，停止收集
+                        console.log(`  遇到下一題目，停止收集`);
+                        break;
+                    } else if (options.length === 0 && line.trim()) {
+                        // 如果還沒開始收集選項，這可能是題目內容的延續
                         questionText += " " + line;
+                        console.log(`  題目內容延續: ${line}`);
+                    }
+                    
+                    // 安全限制：如果已經收集了足夠的選項，停止
+                    if (options.length >= 8) {
+                        break;
                     }
                 }
                 
-                // 確保至少有2個選項的題目才加入
-                if (options.length >= 2) {
-                    questions.push({
-                        id: currentQ.questionId,
-                        question: questionText.trim(),
-                        answer: currentQ.answer,
-                        options: options,
-                        chapter: currentChapter || "第 1 章 企業資源規劃簡介"
-                    });
-                    processedCount++;
-                } else {
-                    console.log(`題目 ${currentQ.questionId} 選項不足 (${options.length} 個):`, options);
+                console.log(`題目 ${currentQ.questionId} 收集到 ${options.length} 個選項`);
+                
+                // 創建題目對象 - 即使選項為0也要保存
+                questions.push({
+                    id: currentQ.questionId,
+                    question: questionText.trim(),
+                    answer: currentQ.answer,
+                    options: options,
+                    chapter: currentChapter || "第 1 章 企業資源規劃簡介"
+                });
+                
+                processedCount++;
+                
+                // 調試信息
+                if (options.length === 0) {
+                    console.log(`⚠️ 題目 ${currentQ.questionId} 沒有找到選項`);
+                } else if (options.length < 4) {
+                    console.log(`⚠️ 題目 ${currentQ.questionId} 選項不足 (${options.length} 個)`);
                 }
             }
             
             // 按題目編號排序
             questions.sort((a, b) => a.id - b.id);
             console.log(`CSV解析完成，成功處理 ${processedCount} 道題目`);
+            
+            // 統計選項數量分布
+            const optionStats = {};
+            questions.forEach(q => {
+                const count = q.options.length;
+                optionStats[count] = (optionStats[count] || 0) + 1;
+            });
+            console.log('選項數量統計:', optionStats);
         }
 
         // 生成題庫瀏覽內容
@@ -942,18 +1084,39 @@
             }
             
             container.innerHTML = questionsToShow.map(q => {
-                const optionsHtml = q.options.map(option => {
-                    const optionLetter = option.match(/^\(([A-D])\)/)[1];
-                    const optionText = option.replace(/^\([A-D]\)\s*/, '');
-                    const isCorrect = optionLetter === q.answer;
-                    
-                    return `
-                        <div class="browse-option ${isCorrect ? 'correct-answer' : ''}">
-                            <strong>${optionLetter})</strong> ${optionText}
-                            ${isCorrect ? ' ✓' : ''}
+                let optionsHtml = '';
+                
+                if (q.options && q.options.length > 0) {
+                    optionsHtml = q.options.map(option => {
+                        // 更安全的選項解析
+                        const letterMatch = option.match(/^\(([A-D])\)/);
+                        if (letterMatch) {
+                            const optionLetter = letterMatch[1];
+                            const optionText = option.replace(/^\([A-D]\)\s*/, '');
+                            const isCorrect = optionLetter === q.answer;
+                            
+                            return `
+                                <div class="browse-option ${isCorrect ? 'correct-answer' : ''}">
+                                    <strong>${optionLetter})</strong> ${optionText}
+                                    ${isCorrect ? ' ✓' : ''}
+                                </div>
+                            `;
+                        } else {
+                            // 如果選項格式不正確，仍然顯示
+                            return `
+                                <div class="browse-option">
+                                    <strong>?)</strong> ${option}
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                } else {
+                    optionsHtml = `
+                        <div style="color: var(--error-red); font-style: italic; padding: 1rem;">
+                            ⚠️ 此題目選項解析失敗，可能原始格式有問題
                         </div>
                     `;
-                }).join('');
+                }
                 
                 return `
                     <div class="browse-item">
@@ -970,6 +1133,12 @@
                         <div class="browse-options">
                             ${optionsHtml}
                         </div>
+                        
+                        ${q.options.length === 0 ? 
+                            `<div style="margin-top: 1rem; padding: 1rem; background: var(--light-red); border-radius: 6px; font-size: 0.9rem;">
+                                <strong>調試信息：</strong>此題目在CSV解析時未找到有效選項，請檢查原始檔案中題目 ${q.id} 的格式。
+                            </div>` : ''
+                        }
                     </div>
                 `;
             }).join('');
@@ -1249,21 +1418,42 @@
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
             
-            question.options.forEach((option, i) => {
-                const optionEl = document.createElement('div');
-                optionEl.className = 'option';
-                
-                const letter = option.match(/^\(([A-D])\)/)[1];
-                const text = option.replace(/^\([A-D]\)\s*/, '');
-                
-                optionEl.innerHTML = `
-                    <div class="option-letter">${letter}</div>
-                    <div>${text}</div>
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((option, i) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'option';
+                    
+                    // 更安全的選項解析
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (letterMatch) {
+                        const letter = letterMatch[1];
+                        const text = option.replace(/^\([A-D]\)\s*/, '');
+                        
+                        optionEl.innerHTML = `
+                            <div class="option-letter">${letter}</div>
+                            <div>${text}</div>
+                        `;
+                        
+                        optionEl.onclick = () => selectOption(letter, optionEl);
+                    } else {
+                        // 如果格式不正確，仍然顯示
+                        optionEl.innerHTML = `
+                            <div class="option-letter">?</div>
+                            <div>${option}</div>
+                        `;
+                    }
+                    
+                    optionsContainer.appendChild(optionEl);
+                });
+            } else {
+                // 如果沒有選項，顯示提示
+                optionsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--error-red);">
+                        ⚠️ 此題目選項解析失敗，請檢查原始數據格式<br>
+                        <small>題目 ${question.id} 的選項可能格式不正確</small>
+                    </div>
                 `;
-                
-                optionEl.onclick = () => selectOption(letter, optionEl);
-                optionsContainer.appendChild(optionEl);
-            });
+            }
             
             // 如果已經答過，顯示之前的選擇
             if (userAnswers[question.id]) {
