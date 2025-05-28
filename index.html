@@ -544,6 +544,79 @@
             background: white;
         }
 
+        /* Wrong Questions Practice Styles */
+        .wrong-practice-welcome {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .wrong-practice-welcome h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .continue-btn {
+            margin-top: 1rem !important;
+            margin-left: 0 !important;
+        }
+
+        .incorrect-question-item {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .incorrect-question-item:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary-blue);
+        }
+
+        .question-option-display {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .question-option-correct {
+            background: var(--light-green);
+            border-left: 3px solid var(--success-green);
+            color: var(--success-green);
+        }
+
+        .question-option-wrong {
+            background: var(--light-red);
+            border-left: 3px solid var(--error-red);
+            color: var(--error-red);
+        }
+
+        .question-option-normal {
+            background: var(--gray-50);
+        }
+
+        .memory-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            transform: translateY(10px);
+        }
+
+        .memory-status:hover {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
@@ -600,6 +673,11 @@
                     <div class="stat-number" id="correctCount">0</div>
                     <div>答對</div>
                 </div>
+
+    <!-- 記憶狀態指示器 -->
+    <div class="memory-status" id="memory-status">
+        💾 記錄已自動保存
+    </div>
                 <div class="stat-item">
                     <div class="stat-number" id="incorrectCount">0</div>
                     <div>答錯</div>
@@ -617,6 +695,7 @@
             <button class="nav-tab active" onclick="showPanel('overview')">題庫總覽</button>
             <button class="nav-tab" onclick="showPanel('practice')">開始刷題</button>
             <button class="nav-tab" onclick="showPanel('browse')">題庫瀏覽</button>
+            <button class="nav-tab" onclick="showPanel('wrong')">錯題練習</button>
             <button class="nav-tab" onclick="showPanel('results')">答題統計</button>
             <button class="nav-tab" onclick="showPanel('debug')" id="debug-tab" style="display: none;">調試信息</button>
         </nav>
@@ -714,6 +793,63 @@
             </div>
         </div>
 
+        <!-- 錯題練習面板 -->
+        <div id="wrong-panel" class="panel">
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-info">
+                        <h3>❌ 錯題練習模式</h3>
+                        <span class="question-badge number" id="wrong-progress-badge">準備中...</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="resetWrongQuestions()" style="margin-right: 1rem;">重置錯題記錄</button>
+                        <button class="btn btn-primary" onclick="startWrongPractice()">開始錯題練習</button>
+                    </div>
+                </div>
+                
+                <div id="wrong-practice-container">
+                    <div id="wrong-welcome" style="text-align: center; padding: 3rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                        <h3 style="margin-bottom: 1rem;">錯題專項練習</h3>
+                        <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                            專門練習答錯的題目，鞏固薄弱知識點<br>
+                            <span id="wrong-count-text">請先完成一些題目來建立錯題庫</span>
+                        </p>
+                        <button class="btn btn-primary" onclick="startWrongPractice()">開始練習</button>
+                    </div>
+
+                    <div id="wrong-practice-content" style="display: none;">
+                        <!-- 錯題練習的題目內容 -->
+                        <div class="question-header">
+                            <div class="question-info">
+                                <span class="question-badge number" id="wrong-current-badge">錯題 1</span>
+                                <span class="question-badge chapter" id="wrong-chapter-badge">載入中...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="question-text" id="wrong-question-text">載入中...</div>
+                        
+                        <div class="options" id="wrong-options-container">
+                            <!-- 選項將由JavaScript生成 -->
+                        </div>
+                        
+                        <div class="controls">
+                            <div class="question-selector">
+                                <span>錯題進度：</span>
+                                <span id="wrong-progress-text">0 / 0</span>
+                            </div>
+                            
+                            <div>
+                                <button class="btn btn-secondary" onclick="previousWrongQuestion()" id="wrong-prev-btn">上一題</button>
+                                <button class="btn btn-primary" onclick="nextWrongQuestion()" id="wrong-next-btn">下一題</button>
+                                <button class="btn btn-success" onclick="submitWrongAnswer()" id="wrong-submit-btn" style="display:none;">確認答案</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 答題統計面板 -->
         <div id="results-panel" class="panel">
             <div class="results-grid">
@@ -736,7 +872,10 @@
             </div>
 
             <div class="question-card">
-                <h3>錯題回顧</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>錯題回顧</h3>
+                    <button class="btn btn-secondary" onclick="clearAllData()" style="font-size: 0.9rem;">清除所有記錄</button>
+                </div>
                 <div id="incorrect-questions">
                     <p style="text-align: center; color: var(--gray-600); padding: 2rem;">
                         還沒有錯題記錄，繼續加油！ 💪
@@ -766,6 +905,103 @@
         let currentQuestionIndex = 0;
         let userAnswers = {}; // 儲存用戶答案
         let showingAnswer = false;
+        
+        // 錯題練習相關
+        let wrongQuestions = [];
+        let currentWrongIndex = 0;
+        let wrongAnswers = {};
+        let showingWrongAnswer = false;
+
+        // 記憶功能 - 數據持久化
+        const STORAGE_KEYS = {
+            USER_ANSWERS: 'erp_user_answers',
+            WRONG_ANSWERS: 'erp_wrong_answers', 
+            LAST_QUESTION: 'erp_last_question',
+            LAST_WRONG_QUESTION: 'erp_last_wrong_question'
+        };
+
+        // 保存數據到localStorage
+        function saveToStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (error) {
+                console.log('保存數據失敗:', error);
+            }
+        }
+
+        // 從localStorage讀取數據
+        function loadFromStorage(key, defaultValue = null) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (error) {
+                console.log('讀取數據失敗:', error);
+                return defaultValue;
+            }
+        }
+
+        // 保存答題記錄
+        function saveAnswers() {
+            saveToStorage(STORAGE_KEYS.USER_ANSWERS, userAnswers);
+            saveToStorage(STORAGE_KEYS.LAST_QUESTION, currentQuestionIndex);
+            showMemoryStatus('記錄已保存');
+        }
+
+        // 保存錯題練習記錄
+        function saveWrongAnswers() {
+            saveToStorage(STORAGE_KEYS.WRONG_ANSWERS, wrongAnswers);
+            saveToStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, currentWrongIndex);
+            showMemoryStatus('錯題記錄已保存');
+        }
+
+        // 顯示記憶狀態
+        function showMemoryStatus(message = '記錄已自動保存') {
+            const indicator = document.getElementById('memory-status');
+            indicator.textContent = `💾 ${message}`;
+            indicator.style.opacity = '1';
+            indicator.style.transform = 'translateY(0)';
+            
+            setTimeout(() => {
+                indicator.style.opacity = '0.6';
+                indicator.style.transform = 'translateY(10px)';
+            }, 2000);
+        }
+
+        // 載入保存的數據
+        function loadSavedData() {
+            userAnswers = loadFromStorage(STORAGE_KEYS.USER_ANSWERS, {});
+            wrongAnswers = loadFromStorage(STORAGE_KEYS.WRONG_ANSWERS, {});
+            const lastQuestion = loadFromStorage(STORAGE_KEYS.LAST_QUESTION, 0);
+            const lastWrongQuestion = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
+            
+            // 恢復到上次的題目位置
+            currentQuestionIndex = Math.max(0, Math.min(lastQuestion, questions.length - 1));
+            currentWrongIndex = Math.max(0, lastWrongQuestion);
+            
+            console.log(`載入保存的數據: ${Object.keys(userAnswers).length} 個答題記錄`);
+        }
+
+        // 清除所有記錄
+        function clearAllData() {
+            if (confirm('確定要清除所有答題記錄嗎？此操作無法復原！')) {
+                localStorage.removeItem(STORAGE_KEYS.USER_ANSWERS);
+                localStorage.removeItem(STORAGE_KEYS.WRONG_ANSWERS);
+                localStorage.removeItem(STORAGE_KEYS.LAST_QUESTION);
+                localStorage.removeItem(STORAGE_KEYS.LAST_WRONG_QUESTION);
+                
+                userAnswers = {};
+                wrongAnswers = {};
+                currentQuestionIndex = 0;
+                currentWrongIndex = 0;
+                
+                updateStats();
+                updateResults();
+                generateOverview();
+                updateWrongQuestionsDisplay();
+                
+                showNotification('所有記錄已清除！', 'success');
+            }
+        }
 
         // 初始化
         async function init() {
@@ -779,12 +1015,17 @@
                 return;
             }
             
+            // 載入保存的答題記錄
+            loadSavedData();
+            
             // 初始化所有功能
             generateOverview();
             generateBrowseContent();
             generateChapterFilter();
-            showQuestion(0);
+            showQuestion(currentQuestionIndex);
             updateStats();
+            updateResults();
+            updateWrongQuestionsDisplay();
             
             // 檢查題目質量並報告
             checkQuestionQuality();
@@ -793,14 +1034,22 @@
             if (questions.length >= 400) {
                 // 成功載入完整題庫
                 document.getElementById('upload-section').style.display = 'none';
-                showNotification(`🎉 成功載入完整ERP題庫 (${questions.length} 題)！`, 'success');
+                showNotification(`🎉 成功載入完整ERP題庫 (${questions.length} 題)！記錄已自動恢復`, 'success');
             } else if (questions.length > 50) {
                 // 載入了部分題庫
                 document.getElementById('upload-section').style.display = 'none';
-                showNotification(`✅ 載入ERP題庫 (${questions.length} 題)`, 'success');
+                showNotification(`✅ 載入ERP題庫 (${questions.length} 題)，記錄已自動恢復`, 'success');
             } else {
                 // 只有演示題目，顯示上傳區域
                 showNotification(`📁 當前為演示模式 (${questions.length} 題)，建議上傳完整CSV文件`, 'success');
+            }
+            
+            // 顯示恢復記錄的提示
+            const savedCount = Object.keys(userAnswers).length;
+            if (savedCount > 0) {
+                setTimeout(() => {
+                    showNotification(`💾 已恢復 ${savedCount} 道題的答題記錄`, 'success');
+                }, 2000);
             }
         }
 
@@ -1514,6 +1763,9 @@
             document.getElementById('submit-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'inline-block';
             
+            // 保存答題記錄
+            saveAnswers();
+            
             // 更新統計
             updateStats();
             generateOverview();
@@ -1524,6 +1776,198 @@
                 showNotification('正確！✅', 'success');
             } else {
                 showNotification('錯誤！❌', 'error');
+            }
+        }
+
+        // 錯題練習相關函數
+        function getWrongQuestions() {
+            return questions.filter(q => {
+                const userAnswer = userAnswers[q.id];
+                return userAnswer && userAnswer !== q.answer;
+            });
+        }
+
+        function updateWrongQuestionsDisplay() {
+            wrongQuestions = getWrongQuestions();
+            const countText = document.getElementById('wrong-count-text');
+            const badge = document.getElementById('wrong-progress-badge');
+            
+            if (wrongQuestions.length === 0) {
+                countText.textContent = '請先完成一些題目來建立錯題庫';
+                badge.textContent = '暫無錯題';
+            } else {
+                countText.textContent = `發現 ${wrongQuestions.length} 道錯題，建議重新練習`;
+                badge.textContent = `${wrongQuestions.length} 道錯題`;
+            }
+        }
+
+        function startWrongPractice() {
+            wrongQuestions = getWrongQuestions();
+            
+            if (wrongQuestions.length === 0) {
+                showNotification('暫無錯題，請先完成一些題目！', 'error');
+                return;
+            }
+            
+            document.getElementById('wrong-welcome').style.display = 'none';
+            document.getElementById('wrong-practice-content').style.display = 'block';
+            
+            currentWrongIndex = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
+            if (currentWrongIndex >= wrongQuestions.length) {
+                currentWrongIndex = 0;
+            }
+            
+            showWrongQuestion(currentWrongIndex);
+            updateWrongProgress();
+        }
+
+        function showWrongQuestion(index) {
+            if (index < 0 || index >= wrongQuestions.length) return;
+            
+            currentWrongIndex = index;
+            const question = wrongQuestions[index];
+            showingWrongAnswer = false;
+            
+            // 更新題目信息
+            document.getElementById('wrong-current-badge').textContent = `錯題 ${index + 1}`;
+            document.getElementById('wrong-chapter-badge').textContent = question.chapter;
+            document.getElementById('wrong-question-text').textContent = question.question;
+            
+            // 生成選項
+            const optionsContainer = document.getElementById('wrong-options-container');
+            optionsContainer.innerHTML = '';
+            
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((option, i) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'option';
+                    
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (letterMatch) {
+                        const letter = letterMatch[1];
+                        const text = option.replace(/^\([A-D]\)\s*/, '');
+                        
+                        optionEl.innerHTML = `
+                            <div class="option-letter">${letter}</div>
+                            <div>${text}</div>
+                        `;
+                        
+                        optionEl.onclick = () => selectWrongOption(letter, optionEl);
+                        
+                        // 顯示之前的錯誤答案
+                        const userAnswer = userAnswers[question.id];
+                        if (letter === userAnswer) {
+                            optionEl.classList.add('incorrect');
+                            optionEl.innerHTML += '<small style="color: var(--error-red); display: block; margin-top: 0.5rem;">上次選擇（錯誤）</small>';
+                        }
+                        if (letter === question.answer) {
+                            optionEl.classList.add('correct');
+                            optionEl.innerHTML += '<small style="color: var(--success-green); display: block; margin-top: 0.5rem;">正確答案</small>';
+                        }
+                    }
+                    
+                    optionsContainer.appendChild(optionEl);
+                });
+            }
+            
+            // 檢查是否已經重新作答
+            if (wrongAnswers[question.id]) {
+                const selectedOption = optionsContainer.querySelector(`[onclick*="${wrongAnswers[question.id]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+            
+            updateWrongButtonStates();
+            updateWrongProgress();
+            saveWrongAnswers();
+        }
+
+        function selectWrongOption(letter, element) {
+            if (showingWrongAnswer) return;
+            
+            // 清除所有選中狀態
+            document.querySelectorAll('#wrong-options-container .option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // 設置當前選中
+            element.classList.add('selected');
+            
+            // 顯示確認按鈕
+            document.getElementById('wrong-submit-btn').style.display = 'inline-block';
+            document.getElementById('wrong-next-btn').style.display = 'none';
+        }
+
+        function submitWrongAnswer() {
+            const question = wrongQuestions[currentWrongIndex];
+            const selectedOption = document.querySelector('#wrong-options-container .option.selected');
+            
+            if (!selectedOption) return;
+            
+            const userAnswer = selectedOption.querySelector('.option-letter').textContent;
+            wrongAnswers[question.id] = userAnswer;
+            
+            // 更新按鈕
+            document.getElementById('wrong-submit-btn').style.display = 'none';
+            document.getElementById('wrong-next-btn').style.display = 'inline-block';
+            
+            // 保存錯題練習記錄
+            saveWrongAnswers();
+            
+            // 給出反饋
+            if (userAnswer === question.answer) {
+                showNotification('這次答對了！✅', 'success');
+                // 從用戶錯題記錄中移除（表示已經掌握）
+                // 這裡可以選擇是否要更新主要的userAnswers
+            } else {
+                showNotification('還是錯誤，再想想！❌', 'error');
+            }
+        }
+
+        function previousWrongQuestion() {
+            if (currentWrongIndex > 0) {
+                showWrongQuestion(currentWrongIndex - 1);
+            }
+        }
+
+        function nextWrongQuestion() {
+            if (currentWrongIndex < wrongQuestions.length - 1) {
+                showWrongQuestion(currentWrongIndex + 1);
+            }
+        }
+
+        function updateWrongButtonStates() {
+            const prevBtn = document.getElementById('wrong-prev-btn');
+            const nextBtn = document.getElementById('wrong-next-btn');
+            
+            prevBtn.disabled = currentWrongIndex === 0;
+            nextBtn.disabled = currentWrongIndex === wrongQuestions.length - 1;
+            
+            prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
+            nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
+        }
+
+        function updateWrongProgress() {
+            const progressText = document.getElementById('wrong-progress-text');
+            if (wrongQuestions.length > 0) {
+                progressText.textContent = `${currentWrongIndex + 1} / ${wrongQuestions.length}`;
+            } else {
+                progressText.textContent = '0 / 0';
+            }
+        }
+
+        function resetWrongQuestions() {
+            if (confirm('確定要重置錯題記錄嗎？這將清除錯題練習的進度。')) {
+                wrongAnswers = {};
+                currentWrongIndex = 0;
+                saveWrongAnswers();
+                
+                document.getElementById('wrong-welcome').style.display = 'block';
+                document.getElementById('wrong-practice-content').style.display = 'none';
+                
+                updateWrongQuestionsDisplay();
+                showNotification('錯題記錄已重置！', 'success');
             }
         }
 
@@ -1554,6 +1998,7 @@
         function previousQuestion() {
             if (currentQuestionIndex > 0) {
                 showQuestion(currentQuestionIndex - 1);
+                saveAnswers(); // 保存當前位置
             }
         }
 
@@ -1561,6 +2006,7 @@
         function nextQuestion() {
             if (currentQuestionIndex < questions.length - 1) {
                 showQuestion(currentQuestionIndex + 1);
+                saveAnswers(); // 保存當前位置
             }
         }
 
@@ -1571,6 +2017,7 @@
             
             if (index !== -1) {
                 showQuestion(index);
+                saveAnswers(); // 保存當前位置
             } else {
                 alert('題目編號不存在！');
             }
@@ -1635,7 +2082,7 @@
             document.getElementById('result-total').textContent = answered;
             document.getElementById('accuracy-rate').textContent = `${accuracy}%`;
             
-            // 更新錯題列表
+            // 更新錯題列表 - 顯示完整信息
             const incorrectContainer = document.getElementById('incorrect-questions');
             const incorrectQuestions = Object.entries(userAnswers).filter(([id, answer]) => {
                 const question = questions.find(q => q.id == id);
@@ -1647,14 +2094,75 @@
             } else {
                 incorrectContainer.innerHTML = incorrectQuestions.map(([id, userAnswer]) => {
                     const question = questions.find(q => q.id == id);
+                    if (!question) return '';
+                    
+                    // 生成完整選項HTML
+                    const optionsHtml = question.options.map(option => {
+                        const letterMatch = option.match(/^\(([A-D])\)/);
+                        if (!letterMatch) return `<div style="padding: 0.25rem 0;">${option}</div>`;
+                        
+                        const letter = letterMatch[1];
+                        const text = option.replace(/^\([A-D]\)\s*/, '');
+                        
+                        let className = 'padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px;';
+                        let suffix = '';
+                        
+                        if (letter === question.answer) {
+                            className += ' background: var(--light-green); border-left: 3px solid var(--success-green); color: var(--success-green);';
+                            suffix = ' ✓ 正確答案';
+                        } else if (letter === userAnswer) {
+                            className += ' background: var(--light-red); border-left: 3px solid var(--error-red); color: var(--error-red);';
+                            suffix = ' ✗ 你的答案';
+                        } else {
+                            className += ' background: var(--gray-50);';
+                        }
+                        
+                        return `<div style="${className}"><strong>${letter})</strong> ${text}${suffix}</div>`;
+                    }).join('');
+                    
                     return `
-                        <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                            <strong>題目 ${id}:</strong> ${question.question}<br>
-                            <span style="color: var(--error-red);">你的答案: ${userAnswer}</span><br>
-                            <span style="color: var(--success-green);">正確答案: ${question.answer}</span>
+                        <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: white;">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <span style="background: var(--error-red); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                                        題目 ${id}
+                                    </span>
+                                    <span style="background: var(--light-blue); color: var(--primary-blue); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">
+                                        ${question.chapter}
+                                    </span>
+                                </div>
+                                <button class="btn btn-secondary" onclick="practiceThisQuestion(${id})" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                                    重新練習
+                                </button>
+                            </div>
+                            
+                            <div style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1rem; color: var(--gray-800);">
+                                <strong>題目：</strong>${question.question}
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <strong>選項：</strong>
+                                <div style="margin-top: 0.5rem;">
+                                    ${optionsHtml}
+                                </div>
+                            </div>
                         </div>
                     `;
                 }).join('');
+            }
+            
+            // 更新錯題練習顯示
+            updateWrongQuestionsDisplay();
+        }
+
+        // 練習特定題目
+        function practiceThisQuestion(questionId) {
+            const questionIndex = questions.findIndex(q => q.id == questionId);
+            if (questionIndex !== -1) {
+                currentQuestionIndex = questionIndex;
+                showPanel('practice');
+                showQuestion(currentQuestionIndex);
+                showNotification(`跳轉到題目 ${questionId}`, 'success');
             }
         }
 
@@ -1676,10 +2184,30 @@
             // 激活對應標籤
             event.target.classList.add('active');
             
-            // 如果切換到瀏覽面板且還沒生成內容，重新生成
+            // 特殊處理
             if (panelName === 'browse' && document.getElementById('browse-container').innerHTML === '') {
                 generateBrowseContent();
                 generateChapterFilter();
+            } else if (panelName === 'wrong') {
+                updateWrongQuestionsDisplay();
+                // 如果有錯題且正在練習中，恢復練習狀態
+                const wrongQs = getWrongQuestions();
+                if (wrongQs.length > 0 && document.getElementById('wrong-practice-content').style.display === 'block') {
+                    // 已經在練習中，不需要特殊處理
+                } else if (wrongQs.length > 0 && loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, -1) >= 0) {
+                    // 有保存的錯題練習進度，詢問是否繼續
+                    const continueBtn = document.createElement('button');
+                    continueBtn.textContent = '繼續上次的錯題練習';
+                    continueBtn.className = 'btn btn-success';
+                    continueBtn.style.marginLeft = '1rem';
+                    continueBtn.onclick = startWrongPractice;
+                    
+                    const welcomeDiv = document.getElementById('wrong-welcome');
+                    if (welcomeDiv && !welcomeDiv.querySelector('.continue-btn')) {
+                        continueBtn.classList.add('continue-btn');
+                        welcomeDiv.appendChild(continueBtn);
+                    }
+                }
             }
         }
 
