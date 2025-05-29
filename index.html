@@ -92,6 +92,7 @@
             padding: 0.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow);
+            overflow-x: auto;
         }
 
         .nav-tab {
@@ -104,6 +105,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            white-space: nowrap;
+            min-width: 100px;
         }
 
         .nav-tab.active {
@@ -199,11 +202,13 @@
 
         .question-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 2px solid var(--gray-100);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .question-info {
@@ -322,9 +327,18 @@
             font-weight: 500;
             transition: all 0.3s ease;
             font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
 
-        .btn:hover {
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: var(--shadow);
         }
@@ -342,6 +356,16 @@
         .btn-secondary {
             background: var(--gray-200);
             color: var(--gray-800);
+        }
+
+        .btn-error {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            color: white;
         }
 
         .question-selector {
@@ -440,7 +464,7 @@
 
         .browse-question-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 1rem;
             gap: 1rem;
@@ -587,9 +611,15 @@
         }
 
         .flashcard {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             perspective: 1000px;
+        }
+
+        .flashcard-container {
+            position: relative;
+            min-height: 400px;
+            transition: all 0.6s ease;
         }
 
         .flashcard-front, .flashcard-back {
@@ -597,20 +627,37 @@
             border-radius: 15px;
             padding: 2rem;
             box-shadow: var(--shadow-lg);
-            min-height: 300px;
+            min-height: 400px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            position: relative;
+            justify-content: space-between;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
             transition: all 0.6s ease;
+            backface-visibility: hidden;
         }
 
         .flashcard-front {
             background: linear-gradient(135deg, var(--light-blue) 0%, white 100%);
+            z-index: 2;
         }
 
         .flashcard-back {
             background: linear-gradient(135deg, var(--light-green) 0%, white 100%);
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        .flashcard-container.flipped .flashcard-front {
+            transform: rotateY(-180deg);
+            z-index: 1;
+        }
+
+        .flashcard-container.flipped .flashcard-back {
+            transform: rotateY(0);
+            z-index: 2;
         }
 
         .card-question-info {
@@ -627,10 +674,30 @@
             text-align: center;
             margin-bottom: 2rem;
             color: var(--gray-800);
-            min-height: 100px;
+            min-height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 1;
+        }
+
+        .card-answer-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-question-review {
+            background: var(--light-blue);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .card-question-review strong {
+            color: var(--primary-blue);
         }
 
         .flip-btn {
@@ -670,7 +737,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
-            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
         }
 
         .difficulty-buttons .btn {
@@ -680,14 +748,8 @@
             transition: all 0.3s ease;
         }
 
-        .btn-error {
-            background: var(--error-red);
-            color: white;
-        }
-
         .btn-error:hover {
             background: #b91c1c;
-            transform: translateY(-2px);
         }
 
         .keyword-highlight {
@@ -802,6 +864,43 @@
             background: var(--gray-50);
         }
 
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success-green);
+        }
+
+        .notification.error {
+            background: var(--error-red);
+        }
+
+        .notification.warning {
+            background: var(--warning-orange);
+        }
+
+        .notification.info {
+            background: var(--primary-blue);
+        }
+
+        /* Memory Status Indicator */
         .memory-status {
             position: fixed;
             bottom: 20px;
@@ -815,6 +914,7 @@
             z-index: 1000;
             transition: all 0.3s ease;
             transform: translateY(10px);
+            cursor: help;
         }
 
         .memory-status:hover {
@@ -822,15 +922,43 @@
             transform: translateY(0) !important;
         }
 
+        /* Loading Indicator */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
+                text-align: center;
             }
 
             .stats {
                 gap: 1rem;
+                justify-content: center;
+            }
+
+            .nav-tabs {
+                padding: 0.25rem;
+                gap: 0.25rem;
+            }
+
+            .nav-tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+                min-width: 80px;
             }
 
             .overview-grid {
@@ -841,6 +969,12 @@
 
             .question-card {
                 padding: 1rem;
+            }
+
+            .question-header {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
             }
 
             .controls {
@@ -876,14 +1010,18 @@
                 padding: 1rem;
             }
 
+            .flashcard {
+                max-width: 100%;
+            }
+
             .flashcard-front, .flashcard-back {
                 padding: 1.5rem;
-                min-height: 250px;
+                min-height: 350px;
             }
 
             .card-question-text {
                 font-size: 1rem;
-                min-height: 80px;
+                min-height: 100px;
             }
 
             .difficulty-buttons {
@@ -906,7 +1044,61 @@
                 margin: 0.25rem;
                 font-size: 0.85rem;
             }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+
+            .memory-status {
+                left: 10px;
+                right: 10px;
+                text-align: center;
+            }
         }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stat-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: var(--light-blue);
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .option {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -919,11 +1111,6 @@
                     <div class="stat-number" id="correctCount">0</div>
                     <div>答對</div>
                 </div>
-
-    <!-- 記憶狀態指示器 -->
-    <div class="memory-status" id="memory-status">
-        💾 記錄已自動保存
-    </div>
                 <div class="stat-item">
                     <div class="stat-number" id="incorrectCount">0</div>
                     <div>答錯</div>
@@ -932,9 +1119,18 @@
                     <div class="stat-number" id="totalAnswered">0</div>
                     <div>已答</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="masteredCount">0</div>
+                    <div>已掌握</div>
+                </div>
             </div>
         </div>
     </header>
+
+    <!-- 記憶狀態指示器 -->
+    <div class="memory-status" id="memory-status" title="點擊查看詳細記憶統計">
+        💾 記錄已自動保存
+    </div>
 
     <div class="container">
         <nav class="nav-tabs">
@@ -980,6 +1176,9 @@
             <div class="question-card">
                 <div class="question-header">
                     <h3>題庫總覽 (點選題號開始作答)</h3>
+                    <div class="question-info">
+                        <span class="question-badge chapter" id="overview-stats">載入中...</span>
+                    </div>
                 </div>
                 <div class="overview-grid" id="overview-grid">
                     <!-- 題目編號將由JavaScript生成 -->
@@ -1016,6 +1215,11 @@
                         <span class="question-badge number" id="current-question-badge">題目 1</span>
                         <span class="question-badge chapter" id="current-chapter-badge">載入中...</span>
                     </div>
+                    <div class="question-selector">
+                        <button class="btn btn-secondary" onclick="goToRandomQuestion()" title="隨機跳題">🎲 隨機</button>
+                        <input type="number" class="question-input" id="question-input" min="1" max="500" placeholder="1">
+                        <button class="btn btn-secondary" onclick="goToQuestion()">前往</button>
+                    </div>
                 </div>
                 
                 <div class="question-text" id="question-text">載入中...</div>
@@ -1025,16 +1229,14 @@
                 </div>
                 
                 <div class="controls">
-                    <div class="question-selector">
-                        <label>跳至題目：</label>
-                        <input type="number" class="question-input" id="question-input" min="1" max="500" placeholder="1">
-                        <button class="btn btn-secondary" onclick="goToQuestion()">前往</button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="previousQuestion()" id="prev-btn">⬅️ 上一題</button>
+                        <button class="btn btn-primary" onclick="nextQuestion()" id="next-btn">下一題 ➡️</button>
                     </div>
                     
                     <div>
-                        <button class="btn btn-secondary" onclick="previousQuestion()" id="prev-btn">上一題</button>
-                        <button class="btn btn-primary" onclick="nextQuestion()" id="next-btn">下一題</button>
-                        <button class="btn btn-success" onclick="submitAnswer()" id="submit-btn" style="display:none;">確認答案</button>
+                        <button class="btn btn-success" onclick="submitAnswer()" id="submit-btn" style="display:none;">✅ 確認答案</button>
+                        <button class="btn btn-warning" onclick="markForReview()" id="review-btn" title="標記為需要復習">⭐ 標記復習</button>
                     </div>
                 </div>
             </div>
@@ -1052,13 +1254,14 @@
                             <option value="association">聯想記憶</option>
                             <option value="spaced">間隔重複</option>
                         </select>
-                        <button class="btn btn-primary" onclick="startMemoryPractice()">開始記憶練習</button>
+                        <button class="btn btn-primary" onclick="startMemoryPractice()">🚀 開始記憶練習</button>
+                        <button class="btn btn-secondary" onclick="resetMemoryData()" title="重置記憶數據">🔄 重置記憶</button>
                     </div>
                 </div>
                 
                 <!-- 記憶卡片模式 -->
                 <div id="flashcard-mode" class="memory-mode active">
-                    <div class="memory-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="memory-stats">
                         <div class="memory-stat-card">
                             <div class="memory-stat-number" id="memory-total">0</div>
                             <div class="memory-stat-label">待記憶</div>
@@ -1079,37 +1282,60 @@
                     
                     <div id="flashcard-container">
                         <div class="flashcard" id="memory-card">
-                            <div class="flashcard-front" id="card-front">
-                                <div class="card-question-info">
-                                    <span class="question-badge number" id="memory-question-badge">題目 1</span>
-                                    <span class="question-badge chapter" id="memory-chapter-badge">載入中...</span>
+                            <div class="flashcard-container" id="flashcard-container-inner">
+                                <div class="flashcard-front" id="card-front">
+                                    <div>
+                                        <div class="card-question-info">
+                                            <span class="question-badge number" id="memory-question-badge">題目 1</span>
+                                            <span class="question-badge chapter" id="memory-chapter-badge">載入中...</span>
+                                        </div>
+                                        <div class="card-question-text" id="memory-question-text">點擊「開始記憶練習」開始學習</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <button class="btn btn-primary flip-btn" onclick="flipCard()">🔄 顯示答案</button>
+                                        <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
+                                            💡 快捷鍵：空格翻轉卡片，數字鍵1-4選擇難度
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-question-text" id="memory-question-text">點擊「開始記憶練習」開始學習</div>
-                                <button class="btn btn-primary flip-btn" onclick="flipCard()">顯示答案</button>
-                                <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
-                                    💡 快捷鍵：空格翻轉卡片
+                                
+                                <div class="flashcard-back" id="card-back">
+                                    <div class="card-answer-section">
+                                        <div>
+                                            <div class="card-question-review" id="question-review">
+                                                <strong>題目回顧：</strong><span id="review-question-text">載入中...</span>
+                                            </div>
+                                            <div class="card-question-text" id="memory-answer-text">答案和解析</div>
+                                            <div class="card-options" id="memory-card-options"></div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="difficulty-buttons">
+                                                <button class="btn btn-error" onclick="markDifficulty('hard')">😰 困難 <br><small>(1) 明天復習</small></button>
+                                                <button class="btn btn-warning" onclick="markDifficulty('medium')">🤔 一般 <br><small>(2) 3天復習</small></button>
+                                                <button class="btn btn-success" onclick="markDifficulty('easy')">😊 簡單 <br><small>(3) 一週復習</small></button>
+                                                <button class="btn btn-primary" onclick="markDifficulty('mastered')">🎯 已掌握 <br><small>(4) 一月復習</small></button>
+                                            </div>
+                                            <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
+                                                快捷鍵：→下一張，←返回題目，ESC退出練習
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="flashcard-back" id="card-back" style="display: none;">
-                                <div class="card-question-text" id="memory-answer-text">答案和解析</div>
-                                <div class="card-options" id="memory-card-options"></div>
-                                <div class="difficulty-buttons">
-                                    <button class="btn btn-error" onclick="markDifficulty('hard')">😰 困難 <small>(1)</small></button>
-                                    <button class="btn btn-secondary" onclick="markDifficulty('medium')">🤔 一般 <small>(2)</small></button>
-                                    <button class="btn btn-success" onclick="markDifficulty('easy')">😊 簡單 <small>(3)</small></button>
-                                    <button class="btn btn-primary" onclick="markDifficulty('mastered')">🎯 已掌握 <small>(4)</small></button>
-                                </div>
-                                <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600);">
-                                    💡 快捷鍵：數字鍵1-4選擇難度，→下一張
-                                </div>
-                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 2rem;">
+                            <button class="btn btn-secondary" onclick="previousMemoryCard()" id="memory-prev-btn">⬅️ 上一張</button>
+                            <button class="btn btn-primary" onclick="nextMemoryCard()" id="memory-next-btn">下一張 ➡️</button>
+                            <button class="btn btn-warning" onclick="backToQuestion()" id="back-to-question-btn" style="display: none;">📖 返回查看題目</button>
+                            <button class="btn btn-secondary" onclick="exitMemoryPractice()" style="margin-left: 1rem;">🚪 退出練習</button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 關鍵詞記憶模式 -->
-                <div id="keyword-mode" class="memory-mode" style="display: none;">
+                <div id="keyword-mode" class="memory-mode">
                     <div class="keyword-practice">
                         <div id="keyword-content">
                             <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
@@ -1120,7 +1346,7 @@
                 </div>
                 
                 <!-- 聯想記憶模式 -->
-                <div id="association-mode" class="memory-mode" style="display: none;">
+                <div id="association-mode" class="memory-mode">
                     <div class="association-practice">
                         <div id="association-content">
                             <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
@@ -1131,7 +1357,7 @@
                 </div>
                 
                 <!-- 間隔重複模式 -->
-                <div id="spaced-mode" class="memory-mode" style="display: none;">
+                <div id="spaced-mode" class="memory-mode">
                     <div class="spaced-practice">
                         <div id="spaced-content">
                             <div style="text-align: center; padding: 2rem;">
@@ -1159,8 +1385,8 @@
                         <span class="question-badge number" id="wrong-progress-badge">準備中...</span>
                     </div>
                     <div>
-                        <button class="btn btn-secondary" onclick="resetWrongQuestions()" style="margin-right: 1rem;">重置錯題記錄</button>
-                        <button class="btn btn-primary" onclick="startWrongPractice()">開始錯題練習</button>
+                        <button class="btn btn-secondary" onclick="resetWrongQuestions()" style="margin-right: 1rem;">🔄 重置錯題記錄</button>
+                        <button class="btn btn-primary" onclick="startWrongPractice()">🚀 開始錯題練習</button>
                     </div>
                 </div>
                 
@@ -1182,6 +1408,10 @@
                                 <span class="question-badge number" id="wrong-current-badge">錯題 1</span>
                                 <span class="question-badge chapter" id="wrong-chapter-badge">載入中...</span>
                             </div>
+                            <div class="question-selector">
+                                <span>錯題進度：</span>
+                                <span id="wrong-progress-text">0 / 0</span>
+                            </div>
                         </div>
                         
                         <div class="question-text" id="wrong-question-text">載入中...</div>
@@ -1191,15 +1421,14 @@
                         </div>
                         
                         <div class="controls">
-                            <div class="question-selector">
-                                <span>錯題進度：</span>
-                                <span id="wrong-progress-text">0 / 0</span>
+                            <div>
+                                <button class="btn btn-secondary" onclick="previousWrongQuestion()" id="wrong-prev-btn">⬅️ 上一題</button>
+                                <button class="btn btn-primary" onclick="nextWrongQuestion()" id="wrong-next-btn">下一題 ➡️</button>
                             </div>
                             
                             <div>
-                                <button class="btn btn-secondary" onclick="previousWrongQuestion()" id="wrong-prev-btn">上一題</button>
-                                <button class="btn btn-primary" onclick="nextWrongQuestion()" id="wrong-next-btn">下一題</button>
-                                <button class="btn btn-success" onclick="submitWrongAnswer()" id="wrong-submit-btn" style="display:none;">確認答案</button>
+                                <button class="btn btn-success" onclick="submitWrongAnswer()" id="wrong-submit-btn" style="display:none;">✅ 確認答案</button>
+                                <button class="btn btn-secondary" onclick="exitWrongPractice()">🚪 退出練習</button>
                             </div>
                         </div>
                     </div>
@@ -1229,10 +1458,19 @@
             </div>
 
             <div class="question-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3>錯題回顧</h3>
-                    <button class="btn btn-secondary" onclick="clearAllData()" style="font-size: 0.9rem;">清除所有記錄</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3>📊 學習統計分析</h3>
+                    <div>
+                        <button class="btn btn-warning" onclick="exportStudyData()" style="margin-right: 1rem;">📤 導出學習數據</button>
+                        <button class="btn btn-error" onclick="clearAllData()">🗑️ 清除所有記錄</button>
+                    </div>
                 </div>
+                
+                <div id="study-analysis" style="margin-bottom: 2rem;">
+                    <!-- 學習分析內容 -->
+                </div>
+                
+                <h4 style="margin-bottom: 1rem;">錯題回顧</h4>
                 <div id="incorrect-questions">
                     <p style="text-align: center; color: var(--gray-600); padding: 2rem;">
                         還沒有錯題記錄，繼續加油！ 💪
@@ -1257,7 +1495,7 @@
     </div>
 
     <script>
-        // 題目數據載入
+        // 全局變量
         let questions = [];
         let currentQuestionIndex = 0;
         let userAnswers = {}; // 儲存用戶答案
@@ -1269,258 +1507,98 @@
         let wrongAnswers = {};
         let showingWrongAnswer = false;
 
-        // 記憶功能 - 數據持久化
+        // 記憶功能相關
+        let memoryData = {};
+        let currentMemoryIndex = 0;
+        let memoryQuestions = [];
+        let currentMemoryMode = 'flashcard';
+        let isCardFlipped = false;
+        let isMemoryPracticing = false;
+
+        // 數據持久化鍵值
         const STORAGE_KEYS = {
             USER_ANSWERS: 'erp_user_answers',
             WRONG_ANSWERS: 'erp_wrong_answers', 
             LAST_QUESTION: 'erp_last_question',
-            LAST_WRONG_QUESTION: 'erp_last_wrong_question'
+            LAST_WRONG_QUESTION: 'erp_last_wrong_question',
+            MEMORY_DATA: 'erp_memory_data',
+            MARKED_FOR_REVIEW: 'erp_marked_for_review'
         };
 
-        // 保存數據到localStorage
-        function saveToStorage(key, data) {
+        // 記憶算法配置
+        const DIFFICULTY_INTERVALS = {
+            'hard': 1,      // 1天後復習
+            'medium': 3,    // 3天後復習  
+            'easy': 7,      // 7天後復習
+            'mastered': 30  // 30天後復習
+        };
+
+        // ERP關鍵詞庫
+        const ERP_KEYWORDS = [
+            'ERP', '企業資源規劃', '銷售', '配銷', '採購', '庫存', '生產', '財務', '人力資源',
+            '模組', '系統', '流程', '管理', '控制', '規劃', '訂單', '客戶', '供應商',
+            '資料庫', '整合', '即時', '成本', '預算', '分析', '報表', '作業', '效率',
+            'Make to Order', 'Make to Stock', 'MRP', 'BOM', 'ATP', 'EOQ', 'ABC分析',
+            '主生產排程', '物料需求規劃', '工作中心', '途程', '品質', '安全存量'
+        ];
+
+        // 通知系統
+        let notificationContainer;
+
+        // ===== 初始化函數 =====
+        async function init() {
             try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (error) {
-                console.log('保存數據失敗:', error);
-            }
-        }
-
-        // 從localStorage讀取數據
-        function loadFromStorage(key, defaultValue = null) {
-            try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : defaultValue;
-            } catch (error) {
-                console.log('讀取數據失敗:', error);
-                return defaultValue;
-            }
-        }
-
-        // 保存答題記錄
-        function saveAnswers() {
-            saveToStorage(STORAGE_KEYS.USER_ANSWERS, userAnswers);
-            saveToStorage(STORAGE_KEYS.LAST_QUESTION, currentQuestionIndex);
-            showMemoryStatus('記錄已保存');
-        }
-
-        // 保存錯題練習記錄
-        function saveWrongAnswers() {
-            saveToStorage(STORAGE_KEYS.WRONG_ANSWERS, wrongAnswers);
-            saveToStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, currentWrongIndex);
-            showMemoryStatus('錯題記錄已保存');
-        }
-
-        // 顯示記憶狀態
-        function showMemoryStatus(message = '記錄已自動保存') {
-            const indicator = document.getElementById('memory-status');
-            indicator.textContent = `💾 ${message}`;
-            indicator.style.opacity = '1';
-            indicator.style.transform = 'translateY(0)';
-            
-            // 添加記憶數據統計
-            const memoryCount = Object.keys(memoryData).length;
-            const masteredCount = Object.values(memoryData).filter(d => d.difficulty === 'mastered').length;
-            
-            if (memoryCount > 0) {
-                indicator.title = `記憶數據：${memoryCount}題，已掌握：${masteredCount}題`;
-            }
-            
-            setTimeout(() => {
-                indicator.style.opacity = '0.6';
-                indicator.style.transform = 'translateY(10px)';
-            }, 2000);
-        }
-
-        // 載入保存的數據
-        function loadSavedData() {
-            userAnswers = loadFromStorage(STORAGE_KEYS.USER_ANSWERS, {});
-            wrongAnswers = loadFromStorage(STORAGE_KEYS.WRONG_ANSWERS, {});
-            const lastQuestion = loadFromStorage(STORAGE_KEYS.LAST_QUESTION, 0);
-            const lastWrongQuestion = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
-            
-            // 恢復到上次的題目位置
-            currentQuestionIndex = Math.max(0, Math.min(lastQuestion, questions.length - 1));
-            currentWrongIndex = Math.max(0, lastWrongQuestion);
-            
-            console.log(`載入保存的數據: ${Object.keys(userAnswers).length} 個答題記錄`);
-        }
-
-        // 清除所有記錄
-        function clearAllData() {
-            if (confirm('確定要清除所有答題記錄嗎？此操作無法復原！')) {
-                localStorage.removeItem(STORAGE_KEYS.USER_ANSWERS);
-                localStorage.removeItem(STORAGE_KEYS.WRONG_ANSWERS);
-                localStorage.removeItem(STORAGE_KEYS.LAST_QUESTION);
-                localStorage.removeItem(STORAGE_KEYS.LAST_WRONG_QUESTION);
+                // 創建通知容器
+                createNotificationContainer();
                 
-                userAnswers = {};
-                wrongAnswers = {};
-                currentQuestionIndex = 0;
-                currentWrongIndex = 0;
+                // 顯示載入提示
+                document.getElementById('question-text').textContent = '正在載入ERP題庫，請稍候...';
+                showNotification('正在載入題庫...', 'info');
                 
+                // 載入題目數據
+                await loadQuestions();
+                
+                if (questions.length === 0) {
+                    document.getElementById('question-text').textContent = '載入失敗，請重新整理頁面或手動上傳CSV文件。';
+                    showNotification('題庫載入失敗！', 'error');
+                    return;
+                }
+                
+                // 載入保存的數據
+                loadSavedData();
+                loadMemoryData();
+                
+                // 初始化所有功能
+                generateOverview();
+                generateBrowseContent();
+                generateChapterFilter();
+                showQuestion(currentQuestionIndex);
                 updateStats();
                 updateResults();
-                generateOverview();
                 updateWrongQuestionsDisplay();
+                updateMemoryStats();
                 
-                showNotification('所有記錄已清除！', 'success');
+                // 檢查題目質量
+                checkQuestionQuality();
+                
+                // 根據載入結果顯示相應提示
+                handleLoadingResult();
+                
+                // 綁定事件監聽器
+                bindEventListeners();
+                
+                console.log('系統初始化完成');
+                
+            } catch (error) {
+                console.error('初始化失敗:', error);
+                showNotification('系統初始化失敗！', 'error');
             }
         }
 
-        // 初始化
-        async function init() {
-            // 顯示載入提示
-            document.getElementById('question-text').textContent = '正在載入ERP題庫，請稍候...';
-            
-            await loadQuestions();
-            
-            if (questions.length === 0) {
-                document.getElementById('question-text').textContent = '載入失敗，請重新整理頁面或手動上傳CSV文件。';
-                return;
-            }
-            
-            // 載入保存的答題記錄和記憶數據
-            loadSavedData();
-            loadMemoryData();
-            
-            // 初始化所有功能
-            generateOverview();
-            generateBrowseContent();
-            generateChapterFilter();
-            showQuestion(currentQuestionIndex);
-            updateStats();
-            updateResults();
-            updateWrongQuestionsDisplay();
-            updateMemoryStats();
-            
-            // 檢查題目質量並報告
-            checkQuestionQuality();
-            
-            // 根據載入的題目數量決定顯示模式
-            if (questions.length >= 400) {
-                // 成功載入完整題庫
-                document.getElementById('upload-section').style.display = 'none';
-                showNotification(`🎉 成功載入完整ERP題庫 (${questions.length} 題)！記錄已自動恢復`, 'success');
-            } else if (questions.length > 50) {
-                // 載入了部分題庫
-                document.getElementById('upload-section').style.display = 'none';
-                showNotification(`✅ 載入ERP題庫 (${questions.length} 題)，記錄已自動恢復`, 'success');
-            } else {
-                // 只有演示題目，顯示上傳區域
-                showNotification(`📁 當前為演示模式 (${questions.length} 題)，建議上傳完整CSV文件`, 'success');
-            }
-            
-            // 顯示恢復記錄的提示
-            const savedCount = Object.keys(userAnswers).length;
-            const memoryCount = Object.keys(memoryData).length;
-            if (savedCount > 0 || memoryCount > 0) {
-                setTimeout(() => {
-                    showNotification(`💾 已恢復 ${savedCount} 道答題記錄，${memoryCount} 道記憶記錄`, 'success');
-                }, 2000);
-            }
-        }
-
-        // 檢查題目質量
-        function checkQuestionQuality() {
-            const problemQuestions = questions.filter(q => !q.options || q.options.length < 2);
-            const incompleteQuestions = questions.filter(q => q.options && q.options.length < 4);
-            const goodQuestions = questions.filter(q => q.options && q.options.length >= 4);
-            
-            console.log(`質量檢查報告:`);
-            console.log(`- 總題目數: ${questions.length}`);
-            console.log(`- 問題題目數 (選項<2): ${problemQuestions.length}`);
-            console.log(`- 不完整題目數 (選項<4): ${incompleteQuestions.length}`);
-            console.log(`- 完整題目數 (選項>=4): ${goodQuestions.length}`);
-            
-            if (problemQuestions.length > 0) {
-                console.log('問題題目編號:', problemQuestions.map(q => q.id));
-            }
-            
-            // 生成調試面板內容
-            generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions);
-            
-            // 如果有問題題目，顯示調試標籤
-            if (problemQuestions.length > 0 || incompleteQuestions.length > 10) {
-                document.getElementById('debug-tab').style.display = 'block';
-            }
-            
-            // 如果問題題目很多，顯示警告
-            if (problemQuestions.length > questions.length * 0.1) {
-                setTimeout(() => {
-                    showNotification(`⚠️ 發現 ${problemQuestions.length} 道題目選項解析有問題，建議檢查CSV格式`, 'error');
-                }, 3000);
-            }
-        }
-
-        // 生成調試內容
-        function generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions) {
-            const debugContainer = document.getElementById('debug-content');
-            
-            const debugHtml = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <div class="result-card">
-                        <div class="result-number" style="color: var(--success-green);">${goodQuestions.length}</div>
-                        <h4>完整題目 (≥4選項)</h4>
-                    </div>
-                    <div class="result-card">
-                        <div class="result-number" style="color: var(--warning-orange);">${incompleteQuestions.length}</div>
-                        <h4>不完整題目 (<4選項)</h4>
-                    </div>
-                    <div class="result-card">
-                        <div class="result-number" style="color: var(--error-red);">${problemQuestions.length}</div>
-                        <h4>問題題目 (<2選項)</h4>
-                    </div>
-                </div>
-                
-                ${problemQuestions.length > 0 ? `
-                    <div style="background: var(--light-red); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                        <h4 style="color: var(--error-red); margin-bottom: 1rem;">⚠️ 問題題目列表 (選項<2個)</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            ${problemQuestions.map(q => 
-                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
-                                    題目${q.id} (${q.options.length}個選項)
-                                </span>`
-                            ).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                ${incompleteQuestions.length > 0 ? `
-                    <div style="background: var(--light-orange); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                        <h4 style="color: var(--warning-orange); margin-bottom: 1rem;">⚠️ 不完整題目列表 (選項<4個)</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            ${incompleteQuestions.slice(0, 20).map(q => 
-                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
-                                    題目${q.id} (${q.options.length}個選項)
-                                </span>`
-                            ).join('')}
-                            ${incompleteQuestions.length > 20 ? 
-                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
-                                    ...還有${incompleteQuestions.length - 20}道
-                                </span>` : ''}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; font-size: 0.9rem;">
-                    <h4 style="margin-bottom: 1rem;">💡 解決建議</h4>
-                    <ul style="line-height: 1.6; margin-left: 1rem;">
-                        <li>如果問題題目很多，請檢查原始CSV文件格式是否正確</li>
-                        <li>確認題目和選項之間是否有空行或其他內容干擾</li>
-                        <li>選項格式應為：(A) 選項內容、(B) 選項內容等</li>
-                        <li>可以嘗試重新上傳CSV文件或聯繫技術支援</li>
-                    </ul>
-                </div>
-            `;
-            
-            debugContainer.innerHTML = debugHtml;
-        }
-
-        // 載入題目數據
+        // ===== 數據載入函數 =====
         async function loadQuestions() {
             try {
-                // 首先嘗試從同目錄讀取CSV文件（部署時使用）
+                // 首先嘗試從同目錄讀取CSV文件
                 console.log('嘗試載入CSV文件...');
                 const response = await fetch('./ERP_Questions.csv');
                 
@@ -1554,7 +1632,7 @@
             loadSampleQuestions();
         }
 
-        // 解析CSV內容
+        // 解析CSV內容 - 優化版
         function parseCSVContent(csvContent) {
             console.log('開始解析CSV內容...');
             const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line && line !== 'Content');
@@ -1563,7 +1641,7 @@
             let currentChapter = "";
             const questionLines = [];
             
-            // 找到所有題目行
+            // 找到所有題目行 - 更精確的正則表達式
             lines.forEach((line, index) => {
                 const match = line.match(/^\(([A-D])\)\s*(\d+)\.\s*(.+)/);
                 if (match) {
@@ -1609,11 +1687,9 @@
                     }
                 }
                 
-                // 收集選項 - 全新的邏輯
+                // 收集選項 - 優化邏輯
                 const startIndex = currentQ.lineIndex + 1;
                 const endIndex = nextQ ? nextQ.lineIndex : lines.length;
-                
-                console.log(`\n處理題目 ${currentQ.questionId} (行 ${currentQ.lineIndex + 1})`);
                 
                 for (let j = startIndex; j < endIndex; j++) {
                     let line = lines[j];
@@ -1637,28 +1713,17 @@
                     const isQuestionLine = line.match(/^\([A-D]\)\s*\d+\./);
                     
                     if (isOptionLine && !isQuestionLine) {
-                        // 這是選項行，不是題目行
                         options.push(line);
-                        console.log(`  找到選項: ${line}`);
                     } else if (isQuestionLine) {
-                        // 遇到下一題目，停止收集
-                        console.log(`  遇到下一題目，停止收集`);
                         break;
                     } else if (options.length === 0 && line.trim()) {
-                        // 如果還沒開始收集選項，這可能是題目內容的延續
                         questionText += " " + line;
-                        console.log(`  題目內容延續: ${line}`);
                     }
                     
-                    // 安全限制：如果已經收集了足夠的選項，停止
-                    if (options.length >= 8) {
-                        break;
-                    }
+                    if (options.length >= 8) break;
                 }
                 
-                console.log(`題目 ${currentQ.questionId} 收集到 ${options.length} 個選項`);
-                
-                // 創建題目對象 - 即使選項為0也要保存
+                // 創建題目對象
                 questions.push({
                     id: currentQ.questionId,
                     question: questionText.trim(),
@@ -1668,29 +1733,1137 @@
                 });
                 
                 processedCount++;
-                
-                // 調試信息
-                if (options.length === 0) {
-                    console.log(`⚠️ 題目 ${currentQ.questionId} 沒有找到選項`);
-                } else if (options.length < 4) {
-                    console.log(`⚠️ 題目 ${currentQ.questionId} 選項不足 (${options.length} 個)`);
-                }
             }
             
             // 按題目編號排序
             questions.sort((a, b) => a.id - b.id);
             console.log(`CSV解析完成，成功處理 ${processedCount} 道題目`);
-            
-            // 統計選項數量分布
-            const optionStats = {};
-            questions.forEach(q => {
-                const count = q.options.length;
-                optionStats[count] = (optionStats[count] || 0) + 1;
-            });
-            console.log('選項數量統計:', optionStats);
         }
 
-        // 生成題庫瀏覽內容
+        // 載入示例題目
+        function loadSampleQuestions() {
+            questions = [
+                {
+                    id: 1,
+                    question: "ERP 系統最新的主流趨勢是採用下列哪一種基本技術架構",
+                    answer: "D",
+                    options: [
+                        "(A) 集中式架構",
+                        "(B) 分散式架構", 
+                        "(C) 同儕計算架構",
+                        "(D) 多層式(Multi-tier)主從架構"
+                    ],
+                    chapter: "第 1 章 企業資源規劃簡介"
+                },
+                {
+                    id: 2,
+                    question: "ERP 系統能即時整合各流程資料的原因為",
+                    answer: "A",
+                    options: [
+                        "(A) 各流程資料儲存於同一資料庫中",
+                        "(B) 快速的電腦運算",
+                        "(C) 電子商務的盛行", 
+                        "(D) 政府鼓勵"
+                    ],
+                    chapter: "第 1 章 企業資源規劃簡介"
+                },
+                // ... 更多示例題目
+            ];
+            console.log(`載入了 ${questions.length} 道示例題目（演示模式）`);
+        }
+
+        // ===== 數據管理函數 =====
+        function saveToStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('保存數據失敗:', error);
+                return false;
+            }
+        }
+
+        function loadFromStorage(key, defaultValue = null) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (error) {
+                console.error('讀取數據失敗:', error);
+                return defaultValue;
+            }
+        }
+
+        function loadSavedData() {
+            userAnswers = loadFromStorage(STORAGE_KEYS.USER_ANSWERS, {});
+            wrongAnswers = loadFromStorage(STORAGE_KEYS.WRONG_ANSWERS, {});
+            const lastQuestion = loadFromStorage(STORAGE_KEYS.LAST_QUESTION, 0);
+            const lastWrongQuestion = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
+            
+            currentQuestionIndex = Math.max(0, Math.min(lastQuestion, questions.length - 1));
+            currentWrongIndex = Math.max(0, lastWrongQuestion);
+            
+            console.log(`載入保存的數據: ${Object.keys(userAnswers).length} 個答題記錄`);
+        }
+
+        function loadMemoryData() {
+            memoryData = loadFromStorage(STORAGE_KEYS.MEMORY_DATA, {});
+            console.log(`載入記憶數據: ${Object.keys(memoryData).length} 個題目記錄`);
+        }
+
+        function saveAnswers() {
+            if (saveToStorage(STORAGE_KEYS.USER_ANSWERS, userAnswers) && 
+                saveToStorage(STORAGE_KEYS.LAST_QUESTION, currentQuestionIndex)) {
+                showMemoryStatus('答題記錄已保存');
+            }
+        }
+
+        function saveMemoryData() {
+            if (saveToStorage(STORAGE_KEYS.MEMORY_DATA, memoryData)) {
+                showMemoryStatus('記憶數據已保存');
+            }
+        }
+
+        function saveWrongAnswers() {
+            if (saveToStorage(STORAGE_KEYS.WRONG_ANSWERS, wrongAnswers) && 
+                saveToStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, currentWrongIndex)) {
+                showMemoryStatus('錯題記錄已保存');
+            }
+        }
+
+        // ===== 界面更新函數 =====
+        function generateOverview() {
+            const grid = document.getElementById('overview-grid');
+            grid.innerHTML = '';
+            
+            // 更新統計信息
+            const totalQuestions = questions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+            const correctCount = Object.entries(userAnswers).filter(([id, answer]) => {
+                const question = questions.find(q => q.id == id);
+                return question && question.answer === answer;
+            }).length;
+            
+            document.getElementById('overview-stats').textContent = 
+                `總題數：${totalQuestions}，已答：${answeredCount}，正確：${correctCount}`;
+            
+            // 更新輸入框最大值
+            const questionInput = document.getElementById('question-input');
+            if (questions.length > 0) {
+                const maxId = Math.max(...questions.map(q => q.id));
+                questionInput.max = maxId;
+            }
+            
+            // 生成題目網格
+            questions.forEach(q => {
+                const numberEl = document.createElement('div');
+                numberEl.className = 'question-number unanswered';
+                numberEl.textContent = q.id;
+                numberEl.onclick = () => {
+                    currentQuestionIndex = questions.findIndex(question => question.id === q.id);
+                    showPanel('practice');
+                    showQuestion(currentQuestionIndex);
+                };
+                
+                // 設置題目狀態
+                if (userAnswers[q.id]) {
+                    if (userAnswers[q.id] === q.answer) {
+                        numberEl.className = 'question-number correct';
+                    } else {
+                        numberEl.className = 'question-number incorrect';
+                    }
+                }
+                
+                // 添加題目信息提示
+                numberEl.title = `題目 ${q.id}: ${q.chapter}\n${q.question.slice(0, 50)}...`;
+                
+                grid.appendChild(numberEl);
+            });
+        }
+
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestionIndex = index;
+            const question = questions[index];
+            showingAnswer = false;
+            
+            // 更新題目信息
+            document.getElementById('current-question-badge').textContent = `題目 ${question.id}`;
+            document.getElementById('current-chapter-badge').textContent = question.chapter;
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('question-input').value = question.id;
+            
+            // 生成選項
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((option, i) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'option';
+                    
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (letterMatch) {
+                        const letter = letterMatch[1];
+                        const text = option.replace(/^\([A-D]\)\s*/, '');
+                        
+                        optionEl.innerHTML = `
+                            <div class="option-letter">${letter}</div>
+                            <div>${text}</div>
+                        `;
+                        
+                        optionEl.onclick = () => selectOption(letter, optionEl);
+                    } else {
+                        optionEl.innerHTML = `
+                            <div class="option-letter">?</div>
+                            <div>${option}</div>
+                        `;
+                    }
+                    
+                    optionsContainer.appendChild(optionEl);
+                });
+            } else {
+                optionsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--error-red);">
+                        ⚠️ 此題目選項解析失敗，請檢查原始數據格式
+                    </div>
+                `;
+            }
+            
+            // 如果已經答過，顯示之前的選擇
+            if (userAnswers[question.id]) {
+                const selectedOption = optionsContainer.querySelector(`[onclick*="${userAnswers[question.id]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+            
+            // 更新按鈕狀態
+            updateButtonStates();
+            updateOverviewHighlight();
+            saveAnswers(); // 保存當前位置
+        }
+
+        function updateStats() {
+            const answered = Object.keys(userAnswers).length;
+            const correct = Object.entries(userAnswers).filter(([id, answer]) => {
+                const question = questions.find(q => q.id == id);
+                return question && question.answer === answer;
+            }).length;
+            const incorrect = answered - correct;
+            const mastered = Object.values(memoryData).filter(data => 
+                data.difficulty === 'mastered').length;
+            
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('totalAnswered').textContent = answered;
+            document.getElementById('masteredCount').textContent = mastered;
+            
+            // 更新進度條
+            const totalQuestions = questions.length;
+            const progressPercent = totalQuestions > 0 ? (answered / totalQuestions) * 100 : 0;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+            document.getElementById('progress-text').textContent = 
+                `${answered} / ${totalQuestions} (${Math.round(progressPercent)}%)`;
+        }
+
+        // ===== 記憶模式函數 =====
+        function changeMemoryMode() {
+            const mode = document.getElementById('memory-mode-select').value;
+            currentMemoryMode = mode;
+            
+            // 隱藏所有模式
+            document.querySelectorAll('.memory-mode').forEach(modeEl => {
+                modeEl.classList.remove('active');
+            });
+            
+            // 顯示選中的模式
+            document.getElementById(`${mode}-mode`).classList.add('active');
+            
+            // 初始化模式
+            if (mode === 'flashcard') {
+                updateMemoryStats();
+            }
+        }
+
+        function startMemoryPractice() {
+            if (questions.length === 0) {
+                showNotification('請先載入題庫！', 'error');
+                return;
+            }
+            
+            prepareMemoryQuestions();
+            
+            if (memoryQuestions.length === 0) {
+                showNotification('所有題目都已掌握！🎉', 'success');
+                return;
+            }
+            
+            isMemoryPracticing = true;
+            currentMemoryIndex = 0;
+            showMemoryCard(currentMemoryIndex);
+            updateMemoryStats();
+            showNotification(`開始記憶練習，共 ${memoryQuestions.length} 道題目`, 'success');
+        }
+
+        function prepareMemoryQuestions() {
+            const today = new Date().toDateString();
+            
+            memoryQuestions = questions.filter(q => {
+                const memoryInfo = memoryData[q.id];
+                if (!memoryInfo) return true; // 新題目
+                if (memoryInfo.difficulty === 'mastered' && memoryInfo.nextReview > today) return false;
+                return memoryInfo.nextReview <= today;
+            });
+            
+            // 按難度排序：困難的優先
+            memoryQuestions.sort((a, b) => {
+                const difficultyOrder = {'hard': 0, 'medium': 1, 'easy': 2, 'mastered': 3};
+                const aDiff = memoryData[a.id]?.difficulty || 'medium';
+                const bDiff = memoryData[b.id]?.difficulty || 'medium';
+                return difficultyOrder[aDiff] - difficultyOrder[bDiff];
+            });
+        }
+
+        function showMemoryCard(index) {
+            if (index < 0 || index >= memoryQuestions.length) return;
+            
+            const question = memoryQuestions[index];
+            isCardFlipped = false;
+            
+            // 重置卡片狀態
+            document.getElementById('flashcard-container-inner').classList.remove('flipped');
+            document.getElementById('back-to-question-btn').style.display = 'none';
+            
+            // 更新卡片內容
+            document.getElementById('memory-question-badge').textContent = `題目 ${question.id}`;
+            document.getElementById('memory-chapter-badge').textContent = question.chapter;
+            
+            // 根據模式顯示題目
+            if (currentMemoryMode === 'keyword') {
+                document.getElementById('memory-question-text').innerHTML = highlightKeywords(question.question);
+            } else {
+                document.getElementById('memory-question-text').textContent = question.question;
+            }
+            
+            // 更新按鈕狀態
+            updateMemoryButtonStates();
+        }
+
+        function flipCard() {
+            if (memoryQuestions.length === 0) return;
+            
+            const question = memoryQuestions[currentMemoryIndex];
+            const container = document.getElementById('flashcard-container-inner');
+            
+            isCardFlipped = !isCardFlipped;
+            
+            if (isCardFlipped) {
+                // 翻轉到背面
+                container.classList.add('flipped');
+                document.getElementById('back-to-question-btn').style.display = 'inline-block';
+                
+                // 更新答案內容
+                document.getElementById('review-question-text').textContent = question.question;
+                document.getElementById('memory-answer-text').innerHTML = 
+                    `<strong>正確答案：${question.answer}</strong><br><br>${generateMemoryTip(question)}`;
+                
+                // 顯示選項
+                const optionsHtml = question.options.map(option => {
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (!letterMatch) return '';
+                    
+                    const letter = letterMatch[1];
+                    const text = option.replace(/^\([A-D]\)\s*/, '');
+                    const isCorrect = letter === question.answer;
+                    
+                    return `
+                        <div class="card-option ${isCorrect ? 'correct' : ''}">
+                            <strong>${letter})</strong> ${text}
+                            ${isCorrect ? ' ✓' : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('memory-card-options').innerHTML = optionsHtml;
+            } else {
+                // 翻轉到正面
+                container.classList.remove('flipped');
+                document.getElementById('back-to-question-btn').style.display = 'none';
+            }
+        }
+
+        function backToQuestion() {
+            if (!isCardFlipped) return;
+            flipCard();
+        }
+
+        function markDifficulty(difficulty) {
+            if (memoryQuestions.length === 0) return;
+            
+            const question = memoryQuestions[currentMemoryIndex];
+            const today = new Date();
+            const nextReviewDate = new Date(today);
+            nextReviewDate.setDate(today.getDate() + DIFFICULTY_INTERVALS[difficulty]);
+            
+            // 更新記憶數據
+            if (!memoryData[question.id]) {
+                memoryData[question.id] = {reviews: 0};
+            }
+            
+            memoryData[question.id] = {
+                ...memoryData[question.id],
+                difficulty: difficulty,
+                lastReview: today.toDateString(),
+                nextReview: nextReviewDate.toDateString(),
+                reviews: (memoryData[question.id].reviews || 0) + 1
+            };
+            
+            saveMemoryData();
+            
+            const feedbackMessages = {
+                'hard': '標記為困難，明天將再次復習',
+                'medium': '標記為一般，3天後復習', 
+                'easy': '標記為簡單，一週後復習',
+                'mastered': '太棒了！已掌握，一個月後復習'
+            };
+            
+            showNotification(feedbackMessages[difficulty], 'success');
+            
+            // 自動移動到下一張卡片
+            setTimeout(() => {
+                nextMemoryCard();
+            }, 1000);
+        }
+
+        function nextMemoryCard() {
+            if (currentMemoryIndex < memoryQuestions.length - 1) {
+                currentMemoryIndex++;
+                showMemoryCard(currentMemoryIndex);
+            } else {
+                // 完成這輪練習
+                showNotification('🎉 本輪記憶練習完成！', 'success');
+                prepareMemoryQuestions();
+                if (memoryQuestions.length > 0) {
+                    currentMemoryIndex = 0;
+                    showMemoryCard(0);
+                } else {
+                    exitMemoryPractice();
+                }
+            }
+            updateMemoryStats();
+        }
+
+        function previousMemoryCard() {
+            if (currentMemoryIndex > 0) {
+                currentMemoryIndex--;
+                showMemoryCard(currentMemoryIndex);
+            }
+        }
+
+        function updateMemoryButtonStates() {
+            const prevBtn = document.getElementById('memory-prev-btn');
+            const nextBtn = document.getElementById('memory-next-btn');
+            
+            if (prevBtn) prevBtn.disabled = currentMemoryIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentMemoryIndex === memoryQuestions.length - 1;
+        }
+
+        function exitMemoryPractice() {
+            isMemoryPracticing = false;
+            isCardFlipped = false;
+            document.getElementById('flashcard-container-inner').classList.remove('flipped');
+            document.getElementById('back-to-question-btn').style.display = 'none';
+            showNotification('已退出記憶練習', 'info');
+        }
+
+        function updateMemoryStats() {
+            const total = questions.length;
+            let mastered = 0, learning = 0, difficult = 0;
+            
+            questions.forEach(q => {
+                const memoryInfo = memoryData[q.id];
+                if (memoryInfo) {
+                    switch(memoryInfo.difficulty) {
+                        case 'mastered': mastered++; break;
+                        case 'hard': difficult++; break;
+                        case 'medium':
+                        case 'easy': learning++; break;
+                    }
+                }
+            });
+            
+            document.getElementById('memory-total').textContent = total - mastered - learning - difficult;
+            document.getElementById('memory-mastered').textContent = mastered;
+            document.getElementById('memory-learning').textContent = learning;
+            document.getElementById('memory-difficult').textContent = difficult;
+        }
+
+        function resetMemoryData() {
+            if (confirm('確定要重置所有記憶數據嗎？此操作無法復原！')) {
+                memoryData = {};
+                saveMemoryData();
+                updateMemoryStats();
+                updateStats();
+                showNotification('記憶數據已重置！', 'success');
+            }
+        }
+
+        // ===== 輔助函數 =====
+        function highlightKeywords(text) {
+            let highlightedText = text;
+            ERP_KEYWORDS.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                highlightedText = highlightedText.replace(regex, '<span class="keyword-highlight">$1</span>');
+            });
+            return highlightedText;
+        }
+
+        function generateMemoryTip(question) {
+            const tips = [
+                `💡 記憶提示：注意題目中的關鍵詞「${extractKeywords(question.question)[0] || 'ERP'}」`,
+                `🔗 聯想記憶：這個概念與「${question.chapter.split(' ')[1]}」密切相關`,
+                `📝 口訣提示：選項${question.answer} - 記住第一個字「${getFirstChar(question)}」`,
+                `🎯 重點：此題考查的核心概念是「${extractConcept(question.question)}」`
+            ];
+            return `<div class="memory-tip">${tips[Math.floor(Math.random() * tips.length)]}</div>`;
+        }
+
+        function extractKeywords(text) {
+            return ERP_KEYWORDS.filter(keyword => 
+                text.toLowerCase().includes(keyword.toLowerCase()));
+        }
+
+        function getFirstChar(question) {
+            const correctOption = question.options.find(opt => {
+                const match = opt.match(/^\(([A-D])\)/);
+                return match && match[1] === question.answer;
+            });
+            if (correctOption) {
+                const text = correctOption.replace(/^\([A-D]\)\s*/, '');
+                return text.charAt(0);
+            }
+            return '';
+        }
+
+        function extractConcept(text) {
+            const concepts = ['系統', '模組', '流程', '管理', '規劃', '控制', '分析'];
+            for (let concept of concepts) {
+                if (text.includes(concept)) return concept;
+            }
+            return 'ERP概念';
+        }
+
+        // ===== 通知系統 =====
+        function createNotificationContainer() {
+            notificationContainer = document.createElement('div');
+            notificationContainer.id = 'notification-container';
+            notificationContainer.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                z-index: 1001;
+                pointer-events: none;
+            `;
+            document.body.appendChild(notificationContainer);
+        }
+
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.pointerEvents = 'auto';
+            
+            if (!notificationContainer) {
+                createNotificationContainer();
+            }
+            
+            notificationContainer.appendChild(notification);
+            
+            // 顯示動畫
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // 自動隱藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+            
+            // 點擊關閉
+            notification.onclick = () => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            };
+        }
+
+        function showMemoryStatus(message = '記錄已自動保存') {
+            const indicator = document.getElementById('memory-status');
+            if (indicator) {
+                indicator.textContent = `💾 ${message}`;
+                indicator.style.opacity = '1';
+                indicator.style.transform = 'translateY(0)';
+                
+                const memoryCount = Object.keys(memoryData).length;
+                const masteredCount = Object.values(memoryData).filter(d => d.difficulty === 'mastered').length;
+                
+                indicator.title = `記憶數據：${memoryCount}題，已掌握：${masteredCount}題\n點擊查看詳細統計`;
+                
+                setTimeout(() => {
+                    indicator.style.opacity = '0.6';
+                    indicator.style.transform = 'translateY(10px)';
+                }, 2000);
+            }
+        }
+
+        // ===== 其他核心函數 =====
+        function selectOption(letter, element) {
+            if (showingAnswer) return;
+            
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function submitAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedOption = document.querySelector('.option.selected');
+            
+            if (!selectedOption) return;
+            
+            const userAnswer = selectedOption.querySelector('.option-letter').textContent;
+            userAnswers[question.id] = userAnswer;
+            
+            showingAnswer = true;
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach(opt => {
+                const letter = opt.querySelector('.option-letter').textContent;
+                if (letter === question.answer) {
+                    opt.classList.add('correct');
+                } else if (letter === userAnswer && letter !== question.answer) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            
+            saveAnswers();
+            updateStats();
+            generateOverview();
+            updateResults();
+            
+            if (userAnswer === question.answer) {
+                showNotification('回答正確！✅', 'success');
+            } else {
+                showNotification(`回答錯誤！正確答案是 ${question.answer}`, 'error');
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function goToQuestion() {
+            const questionId = parseInt(document.getElementById('question-input').value);
+            const index = questions.findIndex(q => q.id === questionId);
+            
+            if (index !== -1) {
+                showQuestion(index);
+            } else {
+                showNotification('題目編號不存在！', 'error');
+            }
+        }
+
+        function goToRandomQuestion() {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            showQuestion(randomIndex);
+            showNotification(`隨機跳到題目 ${questions[randomIndex].id}`, 'info');
+        }
+
+        function markForReview() {
+            const question = questions[currentQuestionIndex];
+            const markedQuestions = loadFromStorage(STORAGE_KEYS.MARKED_FOR_REVIEW, []);
+            
+            if (markedQuestions.includes(question.id)) {
+                // 取消標記
+                const index = markedQuestions.indexOf(question.id);
+                markedQuestions.splice(index, 1);
+                showNotification('已取消復習標記', 'info');
+            } else {
+                // 添加標記
+                markedQuestions.push(question.id);
+                showNotification('已標記為需要復習！⭐', 'success');
+            }
+            
+            saveToStorage(STORAGE_KEYS.MARKED_FOR_REVIEW, markedQuestions);
+        }
+
+        function updateButtonStates() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
+        }
+
+        function updateOverviewHighlight() {
+            document.querySelectorAll('.question-number').forEach(el => {
+                el.classList.remove('current');
+            });
+            
+            const currentEl = document.querySelector(`[onclick*="${questions[currentQuestionIndex].id}"]`);
+            if (currentEl) {
+                currentEl.classList.add('current');
+            }
+        }
+
+        // ===== 錯題練習函數 =====
+        function getWrongQuestions() {
+            return questions.filter(q => {
+                const userAnswer = userAnswers[q.id];
+                return userAnswer && userAnswer !== q.answer;
+            });
+        }
+
+        function updateWrongQuestionsDisplay() {
+            wrongQuestions = getWrongQuestions();
+            const countText = document.getElementById('wrong-count-text');
+            const badge = document.getElementById('wrong-progress-badge');
+            
+            if (wrongQuestions.length === 0) {
+                countText.textContent = '請先完成一些題目來建立錯題庫';
+                badge.textContent = '暫無錯題';
+            } else {
+                countText.textContent = `發現 ${wrongQuestions.length} 道錯題，建議重新練習`;
+                badge.textContent = `${wrongQuestions.length} 道錯題`;
+            }
+        }
+
+        function startWrongPractice() {
+            wrongQuestions = getWrongQuestions();
+            
+            if (wrongQuestions.length === 0) {
+                showNotification('暫無錯題，請先完成一些題目！', 'error');
+                return;
+            }
+            
+            document.getElementById('wrong-welcome').style.display = 'none';
+            document.getElementById('wrong-practice-content').style.display = 'block';
+            
+            currentWrongIndex = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
+            if (currentWrongIndex >= wrongQuestions.length) {
+                currentWrongIndex = 0;
+            }
+            
+            showWrongQuestion(currentWrongIndex);
+            updateWrongProgress();
+            showNotification(`開始錯題練習，共 ${wrongQuestions.length} 道題目`, 'success');
+        }
+
+        function showWrongQuestion(index) {
+            if (index < 0 || index >= wrongQuestions.length) return;
+            
+            currentWrongIndex = index;
+            const question = wrongQuestions[index];
+            showingWrongAnswer = false;
+            
+            document.getElementById('wrong-current-badge').textContent = `錯題 ${index + 1}`;
+            document.getElementById('wrong-chapter-badge').textContent = question.chapter;
+            document.getElementById('wrong-question-text').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('wrong-options-container');
+            optionsContainer.innerHTML = '';
+            
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((option, i) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'option';
+                    
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (letterMatch) {
+                        const letter = letterMatch[1];
+                        const text = option.replace(/^\([A-D]\)\s*/, '');
+                        
+                        optionEl.innerHTML = `
+                            <div class="option-letter">${letter}</div>
+                            <div>${text}</div>
+                        `;
+                        
+                        optionEl.onclick = () => selectWrongOption(letter, optionEl);
+                        
+                        const userAnswer = userAnswers[question.id];
+                        if (letter === userAnswer) {
+                            optionEl.classList.add('incorrect');
+                            optionEl.innerHTML += '<small style="color: var(--error-red); display: block; margin-top: 0.5rem;">上次選擇（錯誤）</small>';
+                        }
+                        if (letter === question.answer) {
+                            optionEl.classList.add('correct');
+                            optionEl.innerHTML += '<small style="color: var(--success-green); display: block; margin-top: 0.5rem;">正確答案</small>';
+                        }
+                    }
+                    
+                    optionsContainer.appendChild(optionEl);
+                });
+            }
+            
+            if (wrongAnswers[question.id]) {
+                const selectedOption = optionsContainer.querySelector(`[onclick*="${wrongAnswers[question.id]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+            
+            updateWrongButtonStates();
+            updateWrongProgress();
+            saveWrongAnswers();
+        }
+
+        function selectWrongOption(letter, element) {
+            if (showingWrongAnswer) return;
+            
+            document.querySelectorAll('#wrong-options-container .option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            
+            document.getElementById('wrong-submit-btn').style.display = 'inline-block';
+            document.getElementById('wrong-next-btn').style.display = 'none';
+        }
+
+        function submitWrongAnswer() {
+            const question = wrongQuestions[currentWrongIndex];
+            const selectedOption = document.querySelector('#wrong-options-container .option.selected');
+            
+            if (!selectedOption) return;
+            
+            const userAnswer = selectedOption.querySelector('.option-letter').textContent;
+            wrongAnswers[question.id] = userAnswer;
+            
+            document.getElementById('wrong-submit-btn').style.display = 'none';
+            document.getElementById('wrong-next-btn').style.display = 'inline-block';
+            
+            saveWrongAnswers();
+            
+            if (userAnswer === question.answer) {
+                showNotification('這次答對了！✅', 'success');
+            } else {
+                showNotification(`還是錯誤！正確答案是 ${question.answer}`, 'error');
+            }
+        }
+
+        function previousWrongQuestion() {
+            if (currentWrongIndex > 0) {
+                showWrongQuestion(currentWrongIndex - 1);
+            }
+        }
+
+        function nextWrongQuestion() {
+            if (currentWrongIndex < wrongQuestions.length - 1) {
+                showWrongQuestion(currentWrongIndex + 1);
+            }
+        }
+
+        function updateWrongButtonStates() {
+            const prevBtn = document.getElementById('wrong-prev-btn');
+            const nextBtn = document.getElementById('wrong-next-btn');
+            
+            if (prevBtn) prevBtn.disabled = currentWrongIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentWrongIndex === wrongQuestions.length - 1;
+        }
+
+        function updateWrongProgress() {
+            const progressText = document.getElementById('wrong-progress-text');
+            if (wrongQuestions.length > 0) {
+                progressText.textContent = `${currentWrongIndex + 1} / ${wrongQuestions.length}`;
+            } else {
+                progressText.textContent = '0 / 0';
+            }
+        }
+
+        function resetWrongQuestions() {
+            if (confirm('確定要重置錯題記錄嗎？這將清除錯題練習的進度。')) {
+                wrongAnswers = {};
+                currentWrongIndex = 0;
+                saveWrongAnswers();
+                
+                document.getElementById('wrong-welcome').style.display = 'block';
+                document.getElementById('wrong-practice-content').style.display = 'none';
+                
+                updateWrongQuestionsDisplay();
+                showNotification('錯題記錄已重置！', 'success');
+            }
+        }
+
+        function exitWrongPractice() {
+            document.getElementById('wrong-welcome').style.display = 'block';
+            document.getElementById('wrong-practice-content').style.display = 'none';
+            showNotification('已退出錯題練習', 'info');
+        }
+
+        // ===== 結果統計函數 =====
+        function updateResults() {
+            const answered = Object.keys(userAnswers).length;
+            const correct = Object.entries(userAnswers).filter(([id, answer]) => {
+                const question = questions.find(q => q.id == id);
+                return question && question.answer === answer;
+            }).length;
+            const incorrect = answered - correct;
+            const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+            
+            document.getElementById('result-correct').textContent = correct;
+            document.getElementById('result-incorrect').textContent = incorrect;
+            document.getElementById('result-total').textContent = answered;
+            document.getElementById('accuracy-rate').textContent = `${accuracy}%`;
+            
+            // 生成學習分析
+            generateStudyAnalysis(answered, correct, incorrect, accuracy);
+            
+            // 更新錯題列表
+            updateIncorrectQuestionsList();
+        }
+
+        function generateStudyAnalysis(answered, correct, incorrect, accuracy) {
+            const analysisContainer = document.getElementById('study-analysis');
+            if (!analysisContainer) return;
+            
+            const chapterStats = {};
+            const totalByChapter = {};
+            
+            // 按章節統計
+            questions.forEach(q => {
+                const chapter = q.chapter;
+                if (!totalByChapter[chapter]) {
+                    totalByChapter[chapter] = 0;
+                    chapterStats[chapter] = { correct: 0, total: 0 };
+                }
+                totalByChapter[chapter]++;
+                
+                if (userAnswers[q.id]) {
+                    chapterStats[chapter].total++;
+                    if (userAnswers[q.id] === q.answer) {
+                        chapterStats[chapter].correct++;
+                    }
+                }
+            });
+            
+            const analysisHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="result-card">
+                        <div class="result-number" style="color: ${accuracy >= 80 ? 'var(--success-green)' : accuracy >= 60 ? 'var(--warning-orange)' : 'var(--error-red)'};">${accuracy}%</div>
+                        <h4>學習掌握度</h4>
+                        <small>${accuracy >= 80 ? '優秀' : accuracy >= 60 ? '良好' : '需要加強'}</small>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--primary-blue);">${Object.keys(chapterStats).length}</div>
+                        <h4>涉及章節</h4>
+                        <small>共${Object.keys(totalByChapter).length}章</small>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--warning-orange);">${Math.round((answered / questions.length) * 100)}%</div>
+                        <h4>完成進度</h4>
+                        <small>${answered}/${questions.length}題</small>
+                    </div>
+                </div>
+                
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h5 style="margin-bottom: 1rem;">📊 各章節表現分析</h5>
+                    ${Object.entries(chapterStats).map(([chapter, stats]) => {
+                        const chapterAccuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+                        const progressWidth = stats.total > 0 ? (stats.total / totalByChapter[chapter]) * 100 : 0;
+                        
+                        return `
+                            <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <strong style="font-size: 0.9rem;">${chapter}</strong>
+                                    <span style="color: ${chapterAccuracy >= 80 ? 'var(--success-green)' : chapterAccuracy >= 60 ? 'var(--warning-orange)' : 'var(--error-red)'}; font-weight: bold;">
+                                        ${chapterAccuracy}% (${stats.correct}/${stats.total})
+                                    </span>
+                                </div>
+                                <div style="background: var(--gray-200); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: ${chapterAccuracy >= 80 ? 'var(--success-green)' : chapterAccuracy >= 60 ? 'var(--warning-orange)' : 'var(--error-red)'}; height: 100%; width: ${progressWidth}%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <small style="color: var(--gray-600);">已完成 ${stats.total}/${totalByChapter[chapter]} 題</small>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                ${answered > 0 ? `
+                    <div style="background: var(--light-blue); padding: 1.5rem; border-radius: 8px;">
+                        <h5 style="color: var(--primary-blue); margin-bottom: 1rem;">💡 學習建議</h5>
+                        <ul style="line-height: 1.6; margin-left: 1rem; color: var(--gray-700);">
+                            ${accuracy < 60 ? '<li>建議重點復習基礎概念，多做練習題</li>' : ''}
+                            ${incorrect > 0 ? '<li>重點關注錯題練習，鞏固薄弱知識點</li>' : ''}
+                            ${answered < questions.length * 0.5 ? '<li>建議增加練習量，完成更多題目</li>' : ''}
+                            ${accuracy >= 80 ? '<li>表現優秀！可以嘗試記憶模式來長期鞏固知識</li>' : ''}
+                            <li>定期復習已掌握的題目，避免遺忘</li>
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+            
+            analysisContainer.innerHTML = analysisHtml;
+        }
+
+        function updateIncorrectQuestionsList() {
+            const incorrectContainer = document.getElementById('incorrect-questions');
+            const incorrectQuestions = Object.entries(userAnswers).filter(([id, answer]) => {
+                const question = questions.find(q => q.id == id);
+                return question && question.answer !== answer;
+            });
+            
+            if (incorrectQuestions.length === 0) {
+                incorrectContainer.innerHTML = '<p style="text-align: center; color: var(--gray-600); padding: 2rem;">還沒有錯題記錄，繼續加油！ 💪</p>';
+                return;
+            }
+            
+            incorrectContainer.innerHTML = incorrectQuestions.map(([id, userAnswer]) => {
+                const question = questions.find(q => q.id == id);
+                if (!question) return '';
+                
+                const optionsHtml = question.options.map(option => {
+                    const letterMatch = option.match(/^\(([A-D])\)/);
+                    if (!letterMatch) return `<div style="padding: 0.25rem 0;">${option}</div>`;
+                    
+                    const letter = letterMatch[1];
+                    const text = option.replace(/^\([A-D]\)\s*/, '');
+                    
+                    let className = 'padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px;';
+                    let suffix = '';
+                    
+                    if (letter === question.answer) {
+                        className += ' background: var(--light-green); border-left: 3px solid var(--success-green); color: var(--success-green);';
+                        suffix = ' ✓ 正確答案';
+                    } else if (letter === userAnswer) {
+                        className += ' background: var(--light-red); border-left: 3px solid var(--error-red); color: var(--error-red);';
+                        suffix = ' ✗ 你的答案';
+                    } else {
+                        className += ' background: var(--gray-50);';
+                    }
+                    
+                    return `<div style="${className}"><strong>${letter})</strong> ${text}${suffix}</div>`;
+                }).join('');
+                
+                return `
+                    <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <span style="background: var(--error-red); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                                    題目 ${id}
+                                </span>
+                                <span style="background: var(--light-blue); color: var(--primary-blue); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">
+                                    ${question.chapter}
+                                </span>
+                            </div>
+                            <button class="btn btn-secondary" onclick="practiceThisQuestion(${id})" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                                重新練習
+                            </button>
+                        </div>
+                        
+                        <div style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1rem; color: var(--gray-800);">
+                            <strong>題目：</strong>${question.question}
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <strong>選項：</strong>
+                            <div style="margin-top: 0.5rem;">
+                                ${optionsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function practiceThisQuestion(questionId) {
+            const questionIndex = questions.findIndex(q => q.id == questionId);
+            if (questionIndex !== -1) {
+                currentQuestionIndex = questionIndex;
+                showPanel('practice');
+                showQuestion(currentQuestionIndex);
+                showNotification(`跳轉到題目 ${questionId}`, 'success');
+            }
+        }
+
+        function exportStudyData() {
+            const studyData = {
+                timestamp: new Date().toISOString(),
+                totalQuestions: questions.length,
+                userAnswers: userAnswers,
+                memoryData: memoryData,
+                statistics: {
+                    answered: Object.keys(userAnswers).length,
+                    correct: Object.entries(userAnswers).filter(([id, answer]) => {
+                        const question = questions.find(q => q.id == id);
+                        return question && question.answer === answer;
+                    }).length,
+                    mastered: Object.values(memoryData).filter(d => d.difficulty === 'mastered').length
+                }
+            };
+            
+            const dataStr = JSON.stringify(studyData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ERP學習數據_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('學習數據已導出！', 'success');
+        }
+
+        function clearAllData() {
+            if (confirm('確定要清除所有答題記錄嗎？此操作無法復原！')) {
+                Object.values(STORAGE_KEYS).forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                userAnswers = {};
+                wrongAnswers = {};
+                memoryData = {};
+                currentQuestionIndex = 0;
+                currentWrongIndex = 0;
+                
+                updateStats();
+                updateResults();
+                generateOverview();
+                updateWrongQuestionsDisplay();
+                updateMemoryStats();
+                
+                showNotification('所有記錄已清除！', 'success');
+            }
+        }
+
+        // ===== 瀏覽模式函數 =====
         function generateBrowseContent(filteredQuestions = null) {
             const container = document.getElementById('browse-container');
             const questionsToShow = filteredQuestions || questions;
@@ -1705,7 +2878,6 @@
                 
                 if (q.options && q.options.length > 0) {
                     optionsHtml = q.options.map(option => {
-                        // 更安全的選項解析
                         const letterMatch = option.match(/^\(([A-D])\)/);
                         if (letterMatch) {
                             const optionLetter = letterMatch[1];
@@ -1719,7 +2891,6 @@
                                 </div>
                             `;
                         } else {
-                            // 如果選項格式不正確，仍然顯示
                             return `
                                 <div class="browse-option">
                                     <strong>?)</strong> ${option}
@@ -1761,7 +2932,6 @@
             }).join('');
         }
 
-        // 生成章節篩選選項
         function generateChapterFilter() {
             const select = document.getElementById('chapter-filter');
             const chapters = [...new Set(questions.map(q => q.chapter))].sort();
@@ -1770,7 +2940,6 @@
                 chapters.map(chapter => `<option value="${chapter}">${chapter}</option>`).join('');
         }
 
-        // 按章節篩選
         function filterByChapter() {
             const selectedChapter = document.getElementById('chapter-filter').value;
             const filterBadge = document.getElementById('browse-filter');
@@ -1784,19 +2953,23 @@
                 filterBadge.textContent = '所有章節';
             }
         }
+
+        // ===== 文件上傳函數 =====
         function uploadCSVFile() {
             const fileInput = document.getElementById('csv-file-upload');
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('請先選擇CSV文件！');
+                showNotification('請先選擇CSV文件！', 'error');
                 return;
             }
             
             if (!file.name.toLowerCase().endsWith('.csv')) {
-                alert('請選擇CSV格式的文件！');
+                showNotification('請選擇CSV格式的文件！', 'error');
                 return;
             }
+            
+            showNotification('正在讀取文件...', 'info');
             
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1812,1032 +2985,29 @@
                 if (questions.length > 0) {
                     // 重新初始化界面
                     generateOverview();
+                    generateBrowseContent();
+                    generateChapterFilter();
                     updateStats();
                     showQuestion(0);
+                    updateResults();
                     
                     // 隱藏上傳區域
                     document.getElementById('upload-section').style.display = 'none';
                     
                     showNotification(`成功載入 ${questions.length} 道題目！🎉`, 'success');
                 } else {
-                    showNotification('CSV文件格式不正確，請檢查文件內容！❌', 'error');
+                    showNotification('CSV文件格式不正確，請檢查文件內容！', 'error');
                 }
             };
             
             reader.onerror = function() {
-                showNotification('文件讀取失敗，請重試！❌', 'error');
+                showNotification('文件讀取失敗，請重試！', 'error');
             };
             
             reader.readAsText(file, 'UTF-8');
         }
 
-        // 載入示例題目（當無法讀取CSV時使用）
-        function loadSampleQuestions() {
-            questions = [
-                {
-                    id: 1,
-                    question: "ERP 系統最新的主流趨勢是採用下列哪一種基本技術架構",
-                    answer: "D",
-                    options: [
-                        "(A) 集中式架構",
-                        "(B) 分散式架構", 
-                        "(C) 同儕計算架構",
-                        "(D) 多層式(Multi-tier)主從架構"
-                    ],
-                    chapter: "第 1 章 企業資源規劃簡介"
-                },
-                {
-                    id: 2,
-                    question: "ERP 系統能即時整合各流程資料的原因為",
-                    answer: "A",
-                    options: [
-                        "(A) 各流程資料儲存於同一資料庫中",
-                        "(B) 快速的電腦運算",
-                        "(C) 電子商務的盛行", 
-                        "(D) 政府鼓勵"
-                    ],
-                    chapter: "第 1 章 企業資源規劃簡介"
-                },
-                {
-                    id: 11,
-                    question: "在銷售與配銷模組中，下列何者為企業從事行銷作業(Marketing Activity)時，最常用而且為最有效的方式",
-                    answer: "A",
-                    options: [
-                        "(A) 直效郵遞 (Direct Mailing, DM)",
-                        "(B) 研討會",
-                        "(C) 銷售電話",
-                        "(D) 銷售講座"
-                    ],
-                    chapter: "第 3 章 銷售與配銷模組"
-                },
-                {
-                    id: 78,
-                    question: "以下何者不是生產規劃的目的",
-                    answer: "A",
-                    options: [
-                        "(A) 增加產品種類",
-                        "(B) 降低生產成本",
-                        "(C) 提高生產效率",
-                        "(D) 確保交期準確"
-                    ],
-                    chapter: "第 4 章 生產規劃與控制"
-                },
-                {
-                    id: 133,
-                    question: "下列何者不是影響企業採購發展趨勢的因素",
-                    answer: "A",
-                    options: [
-                        "(A) 企業組織規模擴大",
-                        "(B) 全球競爭加劇",
-                        "(C) 資訊科技發達",
-                        "(D) 供應商策略聯盟"
-                    ],
-                    chapter: "第 5 章 企業之採購管理"
-                },
-                {
-                    id: 186,
-                    question: "在庫存管理系統中，ABC 分析法是利用何種法則發展出來的存貨分類方法",
-                    answer: "C",
-                    options: [
-                        "(A) 經濟訂購批量法則",
-                        "(B) 安全存量法則",
-                        "(C) 柏拉圖 80-20 法則",
-                        "(D) 再訂購點法則"
-                    ],
-                    chapter: "第 6 章 庫存管理系統"
-                },
-                {
-                    id: 269,
-                    question: "財務會計作業的主要目的為",
-                    answer: "B",
-                    options: [
-                        "(A) 內部管理決策",
-                        "(B) 對外財務報告",
-                        "(C) 成本控制分析",
-                        "(D) 預算編制規劃"
-                    ],
-                    chapter: "第 7 章 ERP 財務會計模組"
-                },
-                {
-                    id: 310,
-                    question: "在成本控制模組中，下列何者屬於變動成本",
-                    answer: "A",
-                    options: [
-                        "(A) 直接材料成本",
-                        "(B) 廠房折舊費用",
-                        "(C) 管理人員薪資",
-                        "(D) 設備租賃費用"
-                    ],
-                    chapter: "第 8 章 成本控制模組"
-                },
-                {
-                    id: 360,
-                    question: "人力資源管理模組的主要功能不包括",
-                    answer: "D",
-                    options: [
-                        "(A) 招募與甄選",
-                        "(B) 訓練與發展",
-                        "(C) 薪資管理",
-                        "(D) 產品設計"
-                    ],
-                    chapter: "第 9 章 人力資源模組"
-                },
-                {
-                    id: 394,
-                    question: "ERP 系統導入過程中，最重要的成功因素為",
-                    answer: "B",
-                    options: [
-                        "(A) 技術先進性",
-                        "(B) 高階主管支持",
-                        "(C) 系統功能完整",
-                        "(D) 成本控制嚴格"
-                    ],
-                    chapter: "第 11 章 系統導入"
-                },
-                {
-                    id: 408,
-                    question: "雲端運算具有下列哪些基本特性",
-                    answer: "A",
-                    options: [
-                        "(A) 隨選即用的自助服務",
-                        "(B) 固定的資源配置",
-                        "(C) 單一存取方式",
-                        "(D) 人工資源管理"
-                    ],
-                    chapter: "第 14 章 企業雲端運算與應用"
-                },
-                {
-                    id: 433,
-                    question: "ERP 系統必須建置在一套穩定的資料庫系統之上，下列何者不是資料庫軟體",
-                    answer: "B",
-                    options: [
-                        "(A) Oracle",
-                        "(B) Windows",
-                        "(C) SQL Server",
-                        "(D) MySQL"
-                    ],
-                    chapter: "第 16 章 資料庫管理與 ERP 系統"
-                }
-            ];
-            console.log(`載入了 ${questions.length} 道示例題目（演示模式 - 涵蓋各主要章節）`);
-        }
-
-        // 生成題庫總覽網格
-        function generateOverview() {
-            const grid = document.getElementById('overview-grid');
-            grid.innerHTML = '';
-            
-            // 更新輸入框最大值
-            const questionInput = document.getElementById('question-input');
-            if (questions.length > 0) {
-                const maxId = Math.max(...questions.map(q => q.id));
-                questionInput.max = maxId;
-            }
-            
-            questions.forEach(q => {
-                const numberEl = document.createElement('div');
-                numberEl.className = 'question-number unanswered';
-                numberEl.textContent = q.id;
-                numberEl.onclick = () => {
-                    currentQuestionIndex = questions.findIndex(question => question.id === q.id);
-                    showPanel('practice');
-                    showQuestion(currentQuestionIndex);
-                };
-                
-                // 根據答題狀態設置樣式
-                if (userAnswers[q.id]) {
-                    if (userAnswers[q.id] === q.answer) {
-                        numberEl.className = 'question-number correct';
-                    } else {
-                        numberEl.className = 'question-number incorrect';
-                    }
-                }
-                
-                grid.appendChild(numberEl);
-            });
-        }
-
-        // 顯示指定題目
-        function showQuestion(index) {
-            if (index < 0 || index >= questions.length) return;
-            
-            currentQuestionIndex = index;
-            const question = questions[index];
-            showingAnswer = false;
-            
-            // 更新題目信息
-            document.getElementById('current-question-badge').textContent = `題目 ${question.id}`;
-            document.getElementById('current-chapter-badge').textContent = question.chapter;
-            document.getElementById('question-text').textContent = question.question;
-            document.getElementById('question-input').value = question.id;
-            
-            // 生成選項
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            
-            if (question.options && question.options.length > 0) {
-                question.options.forEach((option, i) => {
-                    const optionEl = document.createElement('div');
-                    optionEl.className = 'option';
-                    
-                    // 更安全的選項解析
-                    const letterMatch = option.match(/^\(([A-D])\)/);
-                    if (letterMatch) {
-                        const letter = letterMatch[1];
-                        const text = option.replace(/^\([A-D]\)\s*/, '');
-                        
-                        optionEl.innerHTML = `
-                            <div class="option-letter">${letter}</div>
-                            <div>${text}</div>
-                        `;
-                        
-                        optionEl.onclick = () => selectOption(letter, optionEl);
-                    } else {
-                        // 如果格式不正確，仍然顯示
-                        optionEl.innerHTML = `
-                            <div class="option-letter">?</div>
-                            <div>${option}</div>
-                        `;
-                    }
-                    
-                    optionsContainer.appendChild(optionEl);
-                });
-            } else {
-                // 如果沒有選項，顯示提示
-                optionsContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--error-red);">
-                        ⚠️ 此題目選項解析失敗，請檢查原始數據格式<br>
-                        <small>題目 ${question.id} 的選項可能格式不正確</small>
-                    </div>
-                `;
-            }
-            
-            // 如果已經答過，顯示之前的選擇
-            if (userAnswers[question.id]) {
-                const selectedOption = optionsContainer.querySelector(`[onclick*="${userAnswers[question.id]}"]`);
-                if (selectedOption) {
-                    selectedOption.classList.add('selected');
-                }
-            }
-            
-            // 更新按鈕狀態
-            updateButtonStates();
-            
-            // 標記當前題目
-            updateOverviewHighlight();
-        }
-
-        // 選擇選項
-        function selectOption(letter, element) {
-            if (showingAnswer) return;
-            
-            // 清除所有選中狀態
-            document.querySelectorAll('.option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // 設置當前選中
-            element.classList.add('selected');
-            
-            // 顯示確認按鈕
-            document.getElementById('submit-btn').style.display = 'inline-block';
-            document.getElementById('next-btn').style.display = 'none';
-        }
-
-        // 提交答案
-        function submitAnswer() {
-            const question = questions[currentQuestionIndex];
-            const selectedOption = document.querySelector('.option.selected');
-            
-            if (!selectedOption) return;
-            
-            const userAnswer = selectedOption.querySelector('.option-letter').textContent;
-            userAnswers[question.id] = userAnswer;
-            
-            // 顯示正確答案
-            showingAnswer = true;
-            const options = document.querySelectorAll('.option');
-            
-            options.forEach(opt => {
-                const letter = opt.querySelector('.option-letter').textContent;
-                if (letter === question.answer) {
-                    opt.classList.add('correct');
-                } else if (letter === userAnswer && letter !== question.answer) {
-                    opt.classList.add('incorrect');
-                }
-            });
-            
-            // 更新按鈕
-            document.getElementById('submit-btn').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'inline-block';
-            
-            // 保存答題記錄
-            saveAnswers();
-            
-            // 更新統計
-            updateStats();
-            generateOverview();
-            updateResults();
-            
-            // 給出視覺反饋
-            if (userAnswer === question.answer) {
-                showNotification('正確！✅', 'success');
-            } else {
-                showNotification('錯誤！❌', 'error');
-            }
-        }
-
-        // 記憶模式相關變量
-        let memoryData = {};  // 記憶數據：{questionId: {difficulty, lastReview, nextReview, reviews}}
-        let currentMemoryIndex = 0;
-        let memoryQuestions = [];
-        let currentMemoryMode = 'flashcard';
-        let isCardFlipped = false;
-
-        const MEMORY_STORAGE_KEY = 'erp_memory_data';
-        const DIFFICULTY_INTERVALS = {
-            'hard': 1,      // 1天後復習
-            'medium': 3,    // 3天後復習  
-            'easy': 7,      // 7天後復習
-            'mastered': 30  // 30天後復習
-        };
-
-        // ERP關鍵詞庫
-        const ERP_KEYWORDS = [
-            'ERP', '企業資源規劃', '銷售', '配銷', '採購', '庫存', '生產', '財務', '人力資源',
-            '模組', '系統', '流程', '管理', '控制', '規劃', '訂單', '客戶', '供應商',
-            '資料庫', '整合', '即時', '成本', '預算', '分析', '報表', '作業', '效率',
-            'Make to Order', 'Make to Stock', 'MRP', 'BOM', 'ATP', 'EOQ', 'ABC分析',
-            '主生產排程', '物料需求規劃', '工作中心', '途程', '品質', '安全存量'
-        ];
-
-        // 載入記憶數據
-        function loadMemoryData() {
-            memoryData = loadFromStorage(MEMORY_STORAGE_KEY, {});
-            console.log(`載入記憶數據: ${Object.keys(memoryData).length} 個題目記錄`);
-        }
-
-        // 保存記憶數據
-        function saveMemoryData() {
-            saveToStorage(MEMORY_STORAGE_KEY, memoryData);
-            showMemoryStatus('記憶數據已保存');
-        }
-
-        // 切換記憶模式
-        function changeMemoryMode() {
-            const mode = document.getElementById('memory-mode-select').value;
-            currentMemoryMode = mode;
-            
-            // 隱藏所有模式
-            document.querySelectorAll('.memory-mode').forEach(mode => {
-                mode.classList.remove('active');
-            });
-            
-            // 顯示選中的模式
-            document.getElementById(`${mode}-mode`).classList.add('active');
-            
-            // 重新初始化當前模式
-            if (mode === 'flashcard') {
-                updateMemoryStats();
-            } else if (mode === 'keyword') {
-                initKeywordMode();
-            } else if (mode === 'association') {
-                initAssociationMode();
-            } else if (mode === 'spaced') {
-                initSpacedMode();
-            }
-        }
-
-        // 開始記憶練習
-        function startMemoryPractice() {
-            if (questions.length === 0) {
-                showNotification('請先載入題庫！', 'error');
-                return;
-            }
-            
-            // 準備記憶題目（優先顯示需要復習的）
-            prepareMemoryQuestions();
-            
-            if (memoryQuestions.length === 0) {
-                showNotification('所有題目都已掌握！', 'success');
-                return;
-            }
-            
-            currentMemoryIndex = 0;
-            showMemoryCard(currentMemoryIndex);
-            updateMemoryStats();
-        }
-
-        // 準備記憶題目
-        function prepareMemoryQuestions() {
-            const today = new Date().toDateString();
-            
-            memoryQuestions = questions.filter(q => {
-                const memoryInfo = memoryData[q.id];
-                if (!memoryInfo) return true; // 新題目
-                if (memoryInfo.difficulty === 'mastered' && memoryInfo.nextReview > today) return false;
-                return memoryInfo.nextReview <= today; // 需要復習的題目
-            });
-            
-            // 按難度排序：困難的優先
-            memoryQuestions.sort((a, b) => {
-                const difficultyOrder = {'hard': 0, 'medium': 1, 'easy': 2, 'mastered': 3};
-                const aDiff = memoryData[a.id]?.difficulty || 'medium';
-                const bDiff = memoryData[b.id]?.difficulty || 'medium';
-                return difficultyOrder[aDiff] - difficultyOrder[bDiff];
-            });
-            
-            console.log(`準備記憶練習: ${memoryQuestions.length} 道題目`);
-        }
-
-        // 顯示記憶卡片
-        function showMemoryCard(index) {
-            if (index < 0 || index >= memoryQuestions.length) return;
-            
-            const question = memoryQuestions[index];
-            isCardFlipped = false;
-            
-            // 顯示正面
-            document.getElementById('card-front').style.display = 'flex';
-            document.getElementById('card-back').style.display = 'none';
-            
-            // 更新卡片內容
-            document.getElementById('memory-question-badge').textContent = `題目 ${question.id}`;
-            document.getElementById('memory-chapter-badge').textContent = question.chapter;
-            
-            // 根據模式顯示題目
-            if (currentMemoryMode === 'keyword') {
-                document.getElementById('memory-question-text').innerHTML = highlightKeywords(question.question);
-            } else {
-                document.getElementById('memory-question-text').textContent = question.question;
-            }
-        }
-
-        // 翻轉卡片
-        function flipCard() {
-            if (memoryQuestions.length === 0) return;
-            
-            const question = memoryQuestions[currentMemoryIndex];
-            isCardFlipped = !isCardFlipped;
-            
-            if (isCardFlipped) {
-                // 顯示背面（答案）
-                document.getElementById('card-front').style.display = 'none';
-                document.getElementById('card-back').style.display = 'flex';
-                
-                // 更新答案內容
-                document.getElementById('memory-answer-text').innerHTML = 
-                    `<strong>正確答案：${question.answer}</strong><br><br>${generateMemoryTip(question)}`;
-                
-                // 顯示選項
-                const optionsHtml = question.options.map(option => {
-                    const letterMatch = option.match(/^\(([A-D])\)/);
-                    if (!letterMatch) return '';
-                    
-                    const letter = letterMatch[1];
-                    const text = option.replace(/^\([A-D]\)\s*/, '');
-                    const isCorrect = letter === question.answer;
-                    
-                    return `
-                        <div class="card-option ${isCorrect ? 'correct' : ''}">
-                            <strong>${letter})</strong> ${text}
-                            ${isCorrect ? ' ✓' : ''}
-                        </div>
-                    `;
-                }).join('');
-                
-                document.getElementById('memory-card-options').innerHTML = optionsHtml;
-            } else {
-                // 顯示正面
-                document.getElementById('card-front').style.display = 'flex';
-                document.getElementById('card-back').style.display = 'none';
-            }
-        }
-
-        // 標記難度
-        function markDifficulty(difficulty) {
-            if (memoryQuestions.length === 0) return;
-            
-            const question = memoryQuestions[currentMemoryIndex];
-            const today = new Date();
-            const nextReviewDate = new Date(today);
-            nextReviewDate.setDate(today.getDate() + DIFFICULTY_INTERVALS[difficulty]);
-            
-            // 更新記憶數據
-            if (!memoryData[question.id]) {
-                memoryData[question.id] = {reviews: 0};
-            }
-            
-            memoryData[question.id] = {
-                ...memoryData[question.id],
-                difficulty: difficulty,
-                lastReview: today.toDateString(),
-                nextReview: nextReviewDate.toDateString(),
-                reviews: (memoryData[question.id].reviews || 0) + 1
-            };
-            
-            saveMemoryData();
-            
-            // 給予反饋
-            const feedbackMessages = {
-                'hard': '標記為困難，明天將再次復習 😰',
-                'medium': '標記為一般，3天後復習 🤔', 
-                'easy': '標記為簡單，一週後復習 😊',
-                'mastered': '太棒了！已掌握，一個月後復習 🎯'
-            };
-            
-            showNotification(feedbackMessages[difficulty], 'success');
-            
-            // 移動到下一張卡片
-            setTimeout(() => {
-                nextMemoryCard();
-            }, 1000);
-        }
-
-        // 下一張記憶卡片
-        function nextMemoryCard() {
-            if (currentMemoryIndex < memoryQuestions.length - 1) {
-                currentMemoryIndex++;
-                showMemoryCard(currentMemoryIndex);
-            } else {
-                // 完成這輪練習
-                showNotification('🎉 本輪記憶練習完成！', 'success');
-                prepareMemoryQuestions(); // 重新準備題目
-                if (memoryQuestions.length > 0) {
-                    currentMemoryIndex = 0;
-                    showMemoryCard(0);
-                }
-            }
-            updateMemoryStats();
-        }
-
-        // 更新記憶統計
-        function updateMemoryStats() {
-            const total = questions.length;
-            let mastered = 0, learning = 0, difficult = 0;
-            
-            questions.forEach(q => {
-                const memoryInfo = memoryData[q.id];
-                if (memoryInfo) {
-                    switch(memoryInfo.difficulty) {
-                        case 'mastered': mastered++; break;
-                        case 'hard': difficult++; break;
-                        case 'medium':
-                        case 'easy': learning++; break;
-                    }
-                }
-            });
-            
-            document.getElementById('memory-total').textContent = total - mastered - learning - difficult;
-            document.getElementById('memory-mastered').textContent = mastered;
-            document.getElementById('memory-learning').textContent = learning;
-            document.getElementById('memory-difficult').textContent = difficult;
-        }
-
-        // 關鍵詞高亮
-        function highlightKeywords(text) {
-            let highlightedText = text;
-            
-            ERP_KEYWORDS.forEach(keyword => {
-                const regex = new RegExp(`(${keyword})`, 'gi');
-                highlightedText = highlightedText.replace(regex, '<span class="keyword-highlight">$1</span>');
-            });
-            
-            return highlightedText;
-        }
-
-        // 生成記憶提示
-        function generateMemoryTip(question) {
-            const tips = [
-                `💡 記憶提示：注意題目中的關鍵詞「${extractKeywords(question.question)[0] || 'ERP'}」`,
-                `🔗 聯想記憶：這個概念與「${question.chapter.split(' ')[1]}」密切相關`,
-                `📝 口訣提示：選項${question.answer} - 記住第一個字「${getFirstChar(question)}」`,
-                `🎯 重點：此題考查的核心概念是「${extractConcept(question.question)}」`
-            ];
-            
-            return `<div class="memory-tip">${tips[Math.floor(Math.random() * tips.length)]}</div>`;
-        }
-
-        // 提取關鍵詞
-        function extractKeywords(text) {
-            return ERP_KEYWORDS.filter(keyword => 
-                text.toLowerCase().includes(keyword.toLowerCase())
-            );
-        }
-
-        // 獲取正確選項的第一個字
-        function getFirstChar(question) {
-            const correctOption = question.options.find(opt => 
-                opt.match(/^\(([A-D])\)/)[1] === question.answer
-            );
-            if (correctOption) {
-                const text = correctOption.replace(/^\([A-D]\)\s*/, '');
-                return text.charAt(0);
-            }
-            return '';
-        }
-
-        // 提取核心概念
-        function extractConcept(text) {
-            const concepts = ['系統', '模組', '流程', '管理', '規劃', '控制', '分析'];
-            for (let concept of concepts) {
-                if (text.includes(concept)) return concept;
-            }
-            return 'ERP概念';
-        }
-        function getWrongQuestions() {
-            return questions.filter(q => {
-                const userAnswer = userAnswers[q.id];
-                return userAnswer && userAnswer !== q.answer;
-            });
-        }
-
-        function updateWrongQuestionsDisplay() {
-            wrongQuestions = getWrongQuestions();
-            const countText = document.getElementById('wrong-count-text');
-            const badge = document.getElementById('wrong-progress-badge');
-            
-            if (wrongQuestions.length === 0) {
-                countText.textContent = '請先完成一些題目來建立錯題庫';
-                badge.textContent = '暫無錯題';
-            } else {
-                countText.textContent = `發現 ${wrongQuestions.length} 道錯題，建議重新練習`;
-                badge.textContent = `${wrongQuestions.length} 道錯題`;
-            }
-        }
-
-        function startWrongPractice() {
-            wrongQuestions = getWrongQuestions();
-            
-            if (wrongQuestions.length === 0) {
-                showNotification('暫無錯題，請先完成一些題目！', 'error');
-                return;
-            }
-            
-            document.getElementById('wrong-welcome').style.display = 'none';
-            document.getElementById('wrong-practice-content').style.display = 'block';
-            
-            currentWrongIndex = loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, 0);
-            if (currentWrongIndex >= wrongQuestions.length) {
-                currentWrongIndex = 0;
-            }
-            
-            showWrongQuestion(currentWrongIndex);
-            updateWrongProgress();
-        }
-
-        function showWrongQuestion(index) {
-            if (index < 0 || index >= wrongQuestions.length) return;
-            
-            currentWrongIndex = index;
-            const question = wrongQuestions[index];
-            showingWrongAnswer = false;
-            
-            // 更新題目信息
-            document.getElementById('wrong-current-badge').textContent = `錯題 ${index + 1}`;
-            document.getElementById('wrong-chapter-badge').textContent = question.chapter;
-            document.getElementById('wrong-question-text').textContent = question.question;
-            
-            // 生成選項
-            const optionsContainer = document.getElementById('wrong-options-container');
-            optionsContainer.innerHTML = '';
-            
-            if (question.options && question.options.length > 0) {
-                question.options.forEach((option, i) => {
-                    const optionEl = document.createElement('div');
-                    optionEl.className = 'option';
-                    
-                    const letterMatch = option.match(/^\(([A-D])\)/);
-                    if (letterMatch) {
-                        const letter = letterMatch[1];
-                        const text = option.replace(/^\([A-D]\)\s*/, '');
-                        
-                        optionEl.innerHTML = `
-                            <div class="option-letter">${letter}</div>
-                            <div>${text}</div>
-                        `;
-                        
-                        optionEl.onclick = () => selectWrongOption(letter, optionEl);
-                        
-                        // 顯示之前的錯誤答案
-                        const userAnswer = userAnswers[question.id];
-                        if (letter === userAnswer) {
-                            optionEl.classList.add('incorrect');
-                            optionEl.innerHTML += '<small style="color: var(--error-red); display: block; margin-top: 0.5rem;">上次選擇（錯誤）</small>';
-                        }
-                        if (letter === question.answer) {
-                            optionEl.classList.add('correct');
-                            optionEl.innerHTML += '<small style="color: var(--success-green); display: block; margin-top: 0.5rem;">正確答案</small>';
-                        }
-                    }
-                    
-                    optionsContainer.appendChild(optionEl);
-                });
-            }
-            
-            // 檢查是否已經重新作答
-            if (wrongAnswers[question.id]) {
-                const selectedOption = optionsContainer.querySelector(`[onclick*="${wrongAnswers[question.id]}"]`);
-                if (selectedOption) {
-                    selectedOption.classList.add('selected');
-                }
-            }
-            
-            updateWrongButtonStates();
-            updateWrongProgress();
-            saveWrongAnswers();
-        }
-
-        function selectWrongOption(letter, element) {
-            if (showingWrongAnswer) return;
-            
-            // 清除所有選中狀態
-            document.querySelectorAll('#wrong-options-container .option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // 設置當前選中
-            element.classList.add('selected');
-            
-            // 顯示確認按鈕
-            document.getElementById('wrong-submit-btn').style.display = 'inline-block';
-            document.getElementById('wrong-next-btn').style.display = 'none';
-        }
-
-        function submitWrongAnswer() {
-            const question = wrongQuestions[currentWrongIndex];
-            const selectedOption = document.querySelector('#wrong-options-container .option.selected');
-            
-            if (!selectedOption) return;
-            
-            const userAnswer = selectedOption.querySelector('.option-letter').textContent;
-            wrongAnswers[question.id] = userAnswer;
-            
-            // 更新按鈕
-            document.getElementById('wrong-submit-btn').style.display = 'none';
-            document.getElementById('wrong-next-btn').style.display = 'inline-block';
-            
-            // 保存錯題練習記錄
-            saveWrongAnswers();
-            
-            // 給出反饋
-            if (userAnswer === question.answer) {
-                showNotification('這次答對了！✅', 'success');
-                // 從用戶錯題記錄中移除（表示已經掌握）
-                // 這裡可以選擇是否要更新主要的userAnswers
-            } else {
-                showNotification('還是錯誤，再想想！❌', 'error');
-            }
-        }
-
-        function previousWrongQuestion() {
-            if (currentWrongIndex > 0) {
-                showWrongQuestion(currentWrongIndex - 1);
-            }
-        }
-
-        function nextWrongQuestion() {
-            if (currentWrongIndex < wrongQuestions.length - 1) {
-                showWrongQuestion(currentWrongIndex + 1);
-            }
-        }
-
-        function updateWrongButtonStates() {
-            const prevBtn = document.getElementById('wrong-prev-btn');
-            const nextBtn = document.getElementById('wrong-next-btn');
-            
-            prevBtn.disabled = currentWrongIndex === 0;
-            nextBtn.disabled = currentWrongIndex === wrongQuestions.length - 1;
-            
-            prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
-            nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
-        }
-
-        function updateWrongProgress() {
-            const progressText = document.getElementById('wrong-progress-text');
-            if (wrongQuestions.length > 0) {
-                progressText.textContent = `${currentWrongIndex + 1} / ${wrongQuestions.length}`;
-            } else {
-                progressText.textContent = '0 / 0';
-            }
-        }
-
-        function resetWrongQuestions() {
-            if (confirm('確定要重置錯題記錄嗎？這將清除錯題練習的進度。')) {
-                wrongAnswers = {};
-                currentWrongIndex = 0;
-                saveWrongAnswers();
-                
-                document.getElementById('wrong-welcome').style.display = 'block';
-                document.getElementById('wrong-practice-content').style.display = 'none';
-                
-                updateWrongQuestionsDisplay();
-                showNotification('錯題記錄已重置！', 'success');
-            }
-        }
-
-        // 顯示通知
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                padding: 1rem 2rem;
-                border-radius: 8px;
-                color: white;
-                font-weight: bold;
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-                ${type === 'success' ? 'background: var(--success-green);' : 'background: var(--error-red);'}
-            `;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.remove();
-            }, 2000);
-        }
-
-        // 上一題
-        function previousQuestion() {
-            if (currentQuestionIndex > 0) {
-                showQuestion(currentQuestionIndex - 1);
-                saveAnswers(); // 保存當前位置
-            }
-        }
-
-        // 下一題
-        function nextQuestion() {
-            if (currentQuestionIndex < questions.length - 1) {
-                showQuestion(currentQuestionIndex + 1);
-                saveAnswers(); // 保存當前位置
-            }
-        }
-
-        // 跳至指定題目
-        function goToQuestion() {
-            const questionId = parseInt(document.getElementById('question-input').value);
-            const index = questions.findIndex(q => q.id === questionId);
-            
-            if (index !== -1) {
-                showQuestion(index);
-                saveAnswers(); // 保存當前位置
-            } else {
-                alert('題目編號不存在！');
-            }
-        }
-
-        // 更新按鈕狀態
-        function updateButtonStates() {
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            
-            prevBtn.disabled = currentQuestionIndex === 0;
-            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
-            
-            prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
-            nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
-        }
-
-        // 更新總覽高亮
-        function updateOverviewHighlight() {
-            document.querySelectorAll('.question-number').forEach(el => {
-                el.classList.remove('current');
-            });
-            
-            const currentEl = document.querySelector(`[onclick*="${questions[currentQuestionIndex].id}"]`);
-            if (currentEl) {
-                currentEl.classList.add('current');
-            }
-        }
-
-        // 更新統計信息
-        function updateStats() {
-            const answered = Object.keys(userAnswers).length;
-            const correct = Object.entries(userAnswers).filter(([id, answer]) => {
-                const question = questions.find(q => q.id == id);
-                return question && question.answer === answer;
-            }).length;
-            const incorrect = answered - correct;
-            
-            // 計算已掌握的題目數量
-            const mastered = Object.values(memoryData).filter(data => 
-                data.difficulty === 'mastered'
-            ).length;
-            
-            document.getElementById('correctCount').textContent = correct;
-            document.getElementById('incorrectCount').textContent = incorrect;
-            document.getElementById('totalAnswered').textContent = answered;
-            document.getElementById('masteredCount').textContent = mastered;
-            
-            // 更新進度條
-            const totalQuestions = questions.length;
-            const progressPercent = totalQuestions > 0 ? (answered / totalQuestions) * 100 : 0;
-            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
-            document.getElementById('progress-text').textContent = `${answered} / ${totalQuestions} (${Math.round(progressPercent)}%)`;
-        }
-
-        // 更新結果面板
-        function updateResults() {
-            const answered = Object.keys(userAnswers).length;
-            const correct = Object.entries(userAnswers).filter(([id, answer]) => {
-                const question = questions.find(q => q.id == id);
-                return question && question.answer === answer;
-            }).length;
-            const incorrect = answered - correct;
-            const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
-            
-            document.getElementById('result-correct').textContent = correct;
-            document.getElementById('result-incorrect').textContent = incorrect;
-            document.getElementById('result-total').textContent = answered;
-            document.getElementById('accuracy-rate').textContent = `${accuracy}%`;
-            
-            // 更新錯題列表 - 顯示完整信息
-            const incorrectContainer = document.getElementById('incorrect-questions');
-            const incorrectQuestions = Object.entries(userAnswers).filter(([id, answer]) => {
-                const question = questions.find(q => q.id == id);
-                return question && question.answer !== answer;
-            });
-            
-            if (incorrectQuestions.length === 0) {
-                incorrectContainer.innerHTML = '<p style="text-align: center; color: var(--gray-600); padding: 2rem;">還沒有錯題記錄，繼續加油！ 💪</p>';
-            } else {
-                incorrectContainer.innerHTML = incorrectQuestions.map(([id, userAnswer]) => {
-                    const question = questions.find(q => q.id == id);
-                    if (!question) return '';
-                    
-                    // 生成完整選項HTML
-                    const optionsHtml = question.options.map(option => {
-                        const letterMatch = option.match(/^\(([A-D])\)/);
-                        if (!letterMatch) return `<div style="padding: 0.25rem 0;">${option}</div>`;
-                        
-                        const letter = letterMatch[1];
-                        const text = option.replace(/^\([A-D]\)\s*/, '');
-                        
-                        let className = 'padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px;';
-                        let suffix = '';
-                        
-                        if (letter === question.answer) {
-                            className += ' background: var(--light-green); border-left: 3px solid var(--success-green); color: var(--success-green);';
-                            suffix = ' ✓ 正確答案';
-                        } else if (letter === userAnswer) {
-                            className += ' background: var(--light-red); border-left: 3px solid var(--error-red); color: var(--error-red);';
-                            suffix = ' ✗ 你的答案';
-                        } else {
-                            className += ' background: var(--gray-50);';
-                        }
-                        
-                        return `<div style="${className}"><strong>${letter})</strong> ${text}${suffix}</div>`;
-                    }).join('');
-                    
-                    return `
-                        <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: white;">
-                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
-                                <div style="display: flex; gap: 1rem; align-items: center;">
-                                    <span style="background: var(--error-red); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
-                                        題目 ${id}
-                                    </span>
-                                    <span style="background: var(--light-blue); color: var(--primary-blue); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">
-                                        ${question.chapter}
-                                    </span>
-                                </div>
-                                <button class="btn btn-secondary" onclick="practiceThisQuestion(${id})" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                    重新練習
-                                </button>
-                            </div>
-                            
-                            <div style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1rem; color: var(--gray-800);">
-                                <strong>題目：</strong>${question.question}
-                            </div>
-                            
-                            <div style="margin-bottom: 1rem;">
-                                <strong>選項：</strong>
-                                <div style="margin-top: 0.5rem;">
-                                    ${optionsHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            // 更新錯題練習顯示
-            updateWrongQuestionsDisplay();
-        }
-
-        // 練習特定題目
-        function practiceThisQuestion(questionId) {
-            const questionIndex = questions.findIndex(q => q.id == questionId);
-            if (questionIndex !== -1) {
-                currentQuestionIndex = questionIndex;
-                showPanel('practice');
-                showQuestion(currentQuestionIndex);
-                showNotification(`跳轉到題目 ${questionId}`, 'success');
-            }
-        }
-
-        // 面板切換
+        // ===== 面板切換函數 =====
         function showPanel(panelName) {
             // 隱藏所有面板
             document.querySelectorAll('.panel').forEach(panel => {
@@ -2853,7 +3023,17 @@
             document.getElementById(`${panelName}-panel`).classList.add('active');
             
             // 激活對應標籤
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // 如果沒有event，手動找到對應的tab
+                const tabs = document.querySelectorAll('.nav-tab');
+                const panelNames = ['overview', 'practice', 'browse', 'memory', 'wrong', 'results', 'debug'];
+                const index = panelNames.indexOf(panelName);
+                if (index !== -1 && tabs[index]) {
+                    tabs[index].classList.add('active');
+                }
+            }
             
             // 特殊處理
             if (panelName === 'browse' && document.getElementById('browse-container').innerHTML === '') {
@@ -2861,30 +3041,140 @@
                 generateChapterFilter();
             } else if (panelName === 'wrong') {
                 updateWrongQuestionsDisplay();
-                // 如果有錯題且正在練習中，恢復練習狀態
-                const wrongQs = getWrongQuestions();
-                if (wrongQs.length > 0 && document.getElementById('wrong-practice-content').style.display === 'block') {
-                    // 已經在練習中，不需要特殊處理
-                } else if (wrongQs.length > 0 && loadFromStorage(STORAGE_KEYS.LAST_WRONG_QUESTION, -1) >= 0) {
-                    // 有保存的錯題練習進度，詢問是否繼續
-                    const continueBtn = document.createElement('button');
-                    continueBtn.textContent = '繼續上次的錯題練習';
-                    continueBtn.className = 'btn btn-success';
-                    continueBtn.style.marginLeft = '1rem';
-                    continueBtn.onclick = startWrongPractice;
-                    
-                    const welcomeDiv = document.getElementById('wrong-welcome');
-                    if (welcomeDiv && !welcomeDiv.querySelector('.continue-btn')) {
-                        continueBtn.classList.add('continue-btn');
-                        welcomeDiv.appendChild(continueBtn);
-                    }
-                }
+            } else if (panelName === 'results') {
+                updateResults();
+            } else if (panelName === 'memory') {
+                updateMemoryStats();
             }
         }
 
-        // 鍵盤快捷鍵
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('practice-panel').classList.contains('active')) {
+        // ===== 品質檢查函數 =====
+        function checkQuestionQuality() {
+            const problemQuestions = questions.filter(q => !q.options || q.options.length < 2);
+            const incompleteQuestions = questions.filter(q => q.options && q.options.length < 4);
+            const goodQuestions = questions.filter(q => q.options && q.options.length >= 4);
+            
+            console.log(`題庫品質檢查:`);
+            console.log(`- 總題目數: ${questions.length}`);
+            console.log(`- 問題題目數 (選項<2): ${problemQuestions.length}`);
+            console.log(`- 不完整題目數 (選項<4): ${incompleteQuestions.length}`);
+            console.log(`- 完整題目數 (選項>=4): ${goodQuestions.length}`);
+            
+            if (problemQuestions.length > 0) {
+                console.log('問題題目編號:', problemQuestions.map(q => q.id));
+            }
+            
+            generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions);
+            
+            // 如果有問題題目，顯示調試標籤
+            if (problemQuestions.length > 0 || incompleteQuestions.length > 10) {
+                document.getElementById('debug-tab').style.display = 'block';
+            }
+            
+            // 如果問題題目很多，顯示警告
+            if (problemQuestions.length > questions.length * 0.1) {
+                setTimeout(() => {
+                    showNotification(`⚠️ 發現 ${problemQuestions.length} 道題目選項解析有問題`, 'warning');
+                }, 3000);
+            }
+        }
+
+        function generateDebugContent(problemQuestions, incompleteQuestions, goodQuestions) {
+            const debugContainer = document.getElementById('debug-content');
+            
+            const debugHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--success-green);">${goodQuestions.length}</div>
+                        <h4>完整題目 (≥4選項)</h4>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--warning-orange);">${incompleteQuestions.length}</div>
+                        <h4>不完整題目 (<4選項)</h4>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-number" style="color: var(--error-red);">${problemQuestions.length}</div>
+                        <h4>問題題目 (<2選項)</h4>
+                    </div>
+                </div>
+                
+                ${problemQuestions.length > 0 ? `
+                    <div style="background: var(--light-red); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 style="color: var(--error-red); margin-bottom: 1rem;">⚠️ 問題題目列表</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            ${problemQuestions.slice(0, 20).map(q => 
+                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    題目${q.id}
+                                </span>`
+                            ).join('')}
+                            ${problemQuestions.length > 20 ? 
+                                `<span style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    ...還有${problemQuestions.length - 20}道
+                                </span>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; font-size: 0.9rem;">
+                    <h4 style="margin-bottom: 1rem;">💡 使用建議</h4>
+                    <ul style="line-height: 1.6; margin-left: 1rem;">
+                        <li>問題題目仍可正常使用，但可能影響學習體驗</li>
+                        <li>建議使用完整格式的CSV文件以獲得最佳效果</li>
+                        <li>系統會自動跳過格式不正確的選項</li>
+                        <li>如有問題可嘗試重新上傳CSV文件</li>
+                    </ul>
+                </div>
+            `;
+            
+            debugContainer.innerHTML = debugHtml;
+        }
+
+        // ===== 載入結果處理 =====
+        function handleLoadingResult() {
+            if (questions.length >= 400) {
+                document.getElementById('upload-section').style.display = 'none';
+                showNotification(`🎉 成功載入完整ERP題庫 (${questions.length} 題)！`, 'success');
+            } else if (questions.length > 50) {
+                document.getElementById('upload-section').style.display = 'none';
+                showNotification(`✅ 載入ERP題庫 (${questions.length} 題)`, 'success');
+            } else {
+                showNotification(`📁 當前為演示模式 (${questions.length} 題)，建議上傳完整CSV文件`, 'warning');
+            }
+            
+            const savedCount = Object.keys(userAnswers).length;
+            const memoryCount = Object.keys(memoryData).length;
+            if (savedCount > 0 || memoryCount > 0) {
+                setTimeout(() => {
+                    showNotification(`💾 已恢復 ${savedCount} 道答題記錄，${memoryCount} 道記憶記錄`, 'info');
+                }, 2000);
+            }
+        }
+
+        // ===== 事件監聽器 =====
+        function bindEventListeners() {
+            // 記憶狀態點擊事件
+            const memoryStatus = document.getElementById('memory-status');
+            if (memoryStatus) {
+                memoryStatus.onclick = () => {
+                    showPanel('memory');
+                };
+            }
+            
+            // 鍵盤快捷鍵
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+            
+            // 窗口關閉前保存數據
+            window.addEventListener('beforeunload', () => {
+                saveAnswers();
+                saveMemoryData();
+                saveWrongAnswers();
+            });
+        }
+
+        function handleKeyboardShortcuts(e) {
+            const currentPanel = document.querySelector('.panel.active').id;
+            
+            if (currentPanel === 'practice-panel') {
                 switch(e.key) {
                     case 'ArrowLeft':
                         e.preventDefault();
@@ -2899,7 +3189,7 @@
                     case '3':
                     case '4':
                         if (!showingAnswer) {
-                            const optionLetter = String.fromCharCode(64 + parseInt(e.key)); // 1->A, 2->B, etc.
+                            const optionLetter = String.fromCharCode(64 + parseInt(e.key));
                             const optionEl = document.querySelector(`[onclick*="${optionLetter}"]`);
                             if (optionEl) {
                                 selectOption(optionLetter, optionEl);
@@ -2907,15 +3197,21 @@
                         }
                         break;
                     case 'Enter':
-                        if (document.getElementById('submit-btn').style.display !== 'none') {
+                        const submitBtn = document.getElementById('submit-btn');
+                        if (submitBtn.style.display !== 'none') {
                             submitAnswer();
                         }
                         break;
+                    case 'r':
+                    case 'R':
+                        if (e.ctrlKey || e.metaKey) return;
+                        e.preventDefault();
+                        goToRandomQuestion();
+                        break;
                 }
-            } else if (document.getElementById('memory-panel').classList.contains('active')) {
-                // 記憶模式快捷鍵
+            } else if (currentPanel === 'memory-panel' && isMemoryPracticing) {
                 switch(e.key) {
-                    case ' ':  // 空格鍵翻轉卡片
+                    case ' ':
                         e.preventDefault();
                         if (memoryQuestions.length > 0) {
                             flipCard();
@@ -2937,11 +3233,49 @@
                         e.preventDefault();
                         if (isCardFlipped) nextMemoryCard();
                         break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (isCardFlipped) backToQuestion();
+                        else previousMemoryCard();
+                        break;
+                    case 'Escape':
+                        exitMemoryPractice();
+                        break;
                 }
             }
-        });
+            
+            // 全局快捷鍵
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showPanel('overview');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showPanel('practice');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showPanel('browse');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        showPanel('memory');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        showPanel('wrong');
+                        break;
+                    case '6':
+                        e.preventDefault();
+                        showPanel('results');
+                        break;
+                }
+            }
+        }
 
-        // 頁面載入完成後初始化
+        // ===== 頁面初始化 =====
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
